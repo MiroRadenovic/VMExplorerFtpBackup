@@ -1,5 +1,5 @@
 import optparse
-from BackupManager import BackupManager
+import BackupManager
 import pickle
 import logging
 
@@ -11,8 +11,7 @@ def main(params):
 
 
 def startBackup(vmFolderTree, vmDumpFile, num):
-    backupManager = BackupManager()
-    backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTree)
+    backupsToUpload= BackupManager.getBackupsFromFolderTree(vmFolderTree)
     dumpFile = open(vmDumpFile, 'w')
     pickle.dump(backupsToUpload,  dumpFile)
 
