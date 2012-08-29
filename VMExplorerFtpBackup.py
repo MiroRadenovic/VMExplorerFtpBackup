@@ -1,6 +1,6 @@
 import optparse
 import backupManager
-import pickle
+import backupSerializer
 import logging
 
 logging.basicConfig(level=logging.DEBUG,format='%(message)s')
@@ -10,10 +10,12 @@ def main(params):
     startBackup(params.folder, params.dumpfilepath, params.numberOfBackups)
 
 
-def startBackup(vmFolderTree, vmDumpFile, num):
+def startBackup(vmFolderTree, vmDumpFilePath, num):
     backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTree)
-    dumpFile = open(vmDumpFile, 'w')
-    pickle.dump(backupsToUpload,  dumpFile)
+    backupsInDumpFile = backupSerializer.getBackupsFromDumpFile(vmDumpFilePath)
+    for key in backupsToUpload.keys():
+        print(backupsToUpload[key])
+
 
 
 if __name__ == "__main__":
