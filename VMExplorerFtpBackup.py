@@ -18,9 +18,18 @@ def startBackup(vmFolderTree, vmDumpFilePath, num):
 
 
 
-def joinBackups(backupToJoin, destinationBackupToJoin):
-    for vm in backupToJoin.keys:
-        destinationBackupToJoin[vm].append(backupToJoin[vm])
+def mergeBackups(backupToJoin, destinationBackupToJoin):
+    '''
+    Merges 2 backup into 1
+    Args: backupToJoin [dic] the source
+     destinationBackupToJoin [dic] the result of the merge
+    '''
+    for vm in backupToJoin:
+        if vm in destinationBackupToJoin:
+            machine = destinationBackupToJoin[vm]
+            for dateOfBackup in backupToJoin[vm]:
+                machine[dateOfBackup] = backupToJoin[vm][dateOfBackup]
+        else : destinationBackupToJoin[vm] = backupToJoin[vm]
 
 
 if __name__ == "__main__":
