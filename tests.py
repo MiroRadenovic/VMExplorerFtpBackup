@@ -3,7 +3,7 @@ import VMExplorerFtpBackup
 import unittest
 
 class testVMExplorerFtpBackup(unittest.TestCase):
-    def testJoinBackups(self):
+    def testMergeBackups(self):
         sourceBackUp = {
                         'Bart' :   {
                                         self.dateFromString('21/11/06 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
