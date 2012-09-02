@@ -19,7 +19,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                                         dateFromString('21/11/45 16:30') : [ 'bartFile2','file.txt2.2']
                                     },
                         'Bart' :  {
-                                        dateFromString('22/11/06 10:21') :  [ 'raoulFile1,txt']
+                                        dateFromString('22/11/06 10:21') :  [ 'raoulFileMarge,txt']
                         }
 
         }
@@ -27,8 +27,8 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         result = VMExplorerFtpBackup.mergeBackups(sourceBackUp, destinationBackUp)
 
         # Bart checking
-        # first backup
         self.assertTrue('Bart' in destinationBackUp)
+        # first backup
         dateKey = dateFromString('21/11/06 16:30')
         self.assertTrue(dateKey in destinationBackUp['Bart'])
         listOfFiles = destinationBackUp['Bart'][dateKey]
@@ -38,8 +38,17 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         # second backup
         dateKey =dateFromString('21/11/06 16:31')
         self.assertTrue(dateKey in destinationBackUp['Bart'])
+        listOfFiles = destinationBackUp['Bart'][dateKey]
+        self.assertEqual(listOfFiles[0], 'bartFile2')
+        self.assertEqual(listOfFiles[1], 'file.txt2.2')
 
-        self.assertTrue(dateFromString('22/11/06 10:21') in destinationBackUp['Bart'])
+        #third backup (the merged backup)
+        dateKey =dateFromString('22/11/06 10:21')
+        self.assertTrue(dateKey in destinationBackUp['Bart'])
+        listOfFiles = destinationBackUp['Bart'][dateKey]
+        self.assertEqual(listOfFiles[0], 'raoulFileMarge,txt')
+
+        # other backups..
         self.assertTrue('Raoul' in destinationBackUp)
         self.assertTrue(dateFromString('21/11/16 16:30') in destinationBackUp['Raoul'])
         self.assertTrue('Miro' in destinationBackUp)
