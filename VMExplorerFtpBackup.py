@@ -25,30 +25,23 @@ def mergeBackup(backup1, backup2):
 def sortAndRemoveOldBackups(backups, maxNumberOfBackupsToKeepForSingleVm):
     for vmName in backups:
         vmBackups = backups[vmName]
-        sortDicByKey(vmBackups)
-        removeOldBackups(vmBackups,maxNumberOfBackupsToKeepForSingleVm)
+        sortedBackup= takeFirstBackups(vmBackups, maxNumberOfBackupsToKeepForSingleVm)
+        backups[vmName] = sortedBackup
 
-def removeOldBackups(dic, maxNumberOfBackupsToKeep):
-    result = {}
+def takeFirstBackups(dic, numberOfBackupsToTake):
+    '''
+    takes
+    '''
     currentIndex = 0
-    for key in dic:
-        if currentIndex < maxNumberOfBackupsToKeep:
-            result[key] = dic[key]
-            currentIndex += 1
-    dic = result
-
-
-def sortDicByKey(dic):
     result = {}
     keys = dic.keys()
     keys.sort()
     for key in keys:
-        result[key] = dic[key]
-    dic = result
-
-
-
-
+        if currentIndex < numberOfBackupsToTake:
+            result[key] = dic[key]
+            currentIndex +=1
+        else: return result
+    return result
 
 
 def _mergeFirstBackupIntoSecondBackup_(backupToJoin, destinationBackupToJoin):

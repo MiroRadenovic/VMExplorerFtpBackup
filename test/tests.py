@@ -10,7 +10,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                                         dateFromString('21/11/06 16:31') : [ 'bartFile2','file.txt2.2']
                                     },
                         'Raoul' :  {
-                                        dateFromString('21/11/16 16:3') :  [ 'raoulFile1,txt']
+                                        dateFromString('21/11/16 16:36') :  [ 'raoulFile1,txt']
                                     }
                         }
         destinationBackUp = {
@@ -50,28 +50,42 @@ class testVMExplorerFtpBackup(unittest.TestCase):
 
         # other backups..
         self.assertTrue('Raoul' in result)
-        self.assertTrue(dateFromString('21/11/16 16:30') in result['Raoul'])
+        self.assertTrue(dateFromString('21/11/16 16:36') in result['Raoul'])
         self.assertTrue('Miro' in result)
         self.assertTrue(dateFromString('21/11/46 16:30') in result['Miro'])
         self.assertTrue(dateFromString('21/11/45 16:30') in result['Miro'])
 
     def testSortAndRemoveOldBackups(self):
+        #arrange
         backup= { 'Bart' :   {
-            dateFromString('21/11/06 16:25') : [ 'bartFile1.txt','bartFile1.2.txt'],
-            dateFromString('21/11/06 16:31') : [ 'bartFile2','file.txt2.2'],
-            dateFromString('21/11/06 16:26') : [ 'bartFile2','file.txt2.2'],
-            dateFromString('23/11/06 16:31') : [ 'bartFile2','file.txt2.2'],
-            dateFromString('24/11/06 16:31') : [ 'bartFile2','file.txt2.2'],
-            dateFromString('21/10/06 16:31') : [ 'bartFile2','file.txt2.2'],
-            dateFromString('21/10/05 16:31') : [ 'bartFile2','file.txt2.2'],
-            dateFromString('21/10/03 16:31') : [ 'bartFile2','file.txt2.2']
+            dateFromString('21/11/06 16:25') : [ 'c' ],
+            dateFromString('25/11/06 16:31') : [ 'skip'],
+            dateFromString('21/11/06 16:26') : [ 'd'],
+            dateFromString('23/11/06 16:39') : [ 'skip'],
+            dateFromString('24/11/06 16:31') : [ 'skip'],
+            dateFromString('21/11/06 16:31') : [ 'e'],
+            dateFromString('21/10/05 16:31') : [ 'b'],
+            dateFromString('21/10/03 16:31') : [ 'a']
                  }
             }
+
+        #act
         VMExplorerFtpBackup.sortAndRemoveOldBackups(backup, 5)
+
+        #asserts
         bartBackup = backup['Bart']
         self.assertEquals(bartBackup.__len__(), 5)
-        vmKeys = bartBackup.keys()
-        self.assertEqual(vmKeys[0], dateFromString('21/10/04 16:31'))
+        #make sure there is no element that is supposed to be skipped
+        for vmKey in bartBackup:
+            self.assertTrue(bartBackup[vmKey] != ['skip'])
+
+        self.assertEqual( bartBackup[dateFromString('21/10/03 16:31')], ['a'])
+        self.assertEqual( bartBackup[dateFromString('21/10/05 16:31')], ['b'])
+        self.assertEqual( bartBackup[dateFromString('21/11/06 16:25')], ['c'])
+        self.assertEqual( bartBackup[dateFromString('21/11/06 16:26')], ['d'])
+        self.assertEqual( bartBackup[dateFromString('21/11/06 16:31')], ['e'])
+
+
 
 
 def dateFromString(date):
