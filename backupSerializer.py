@@ -20,3 +20,6 @@ def getBackupsFromDumpFile(pathToDumpFile='backupDb.dump'):
     except Exception as ex:
         log.error("an error is raised while reading the dump file in path {0} . Error is {1}".format(pathToDumpFile,ex))
 
+
+def getBackupsFromFtpServer(hostname, user='anonymous', password='anonymous'):
+    pass
