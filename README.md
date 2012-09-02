@@ -6,8 +6,10 @@ A backup helper for VMExplorer that uploads virtual machines backups to a FTP se
 
 
 TESTS
+=====
 
 under the folder VMbackupFolder there is a folder structure that represents the backup folder tree created by VMExplorer:
+<pre>
 c:\VirtualMachinesTemp  (root backup folder)
  ---| Bart   (name of the virtual machine)
  -------| 2000-08-28-154138     (date of the backup)
@@ -19,7 +21,7 @@ c:\VirtualMachinesTemp  (root backup folder)
  ---| Raoul
  -------| 2000-08-28-154138
  -----------| file1.vmx
-
+</pre>
 please note:
 1) tests.py will execute testscases based on this structure, so don't change files and folders name
 2) to simulate an ftp server, a dependency to twistd is required and the following command will be used
