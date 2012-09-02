@@ -26,6 +26,8 @@ please note:
 - tests.py will execute testscases based on this structure, so don't change files and folders name
 - to simulate an ftp server, a dependency to twistd is required and the following command will be used
     to create a ftp server:
+    <pre>
     twistd -n ftp -p 2000 -r /home/myo --password-file=/home/myo/Temp/pass.dat
+    </pre>
     if you don't know what is twist, please check: http://twistedmatrix.com/
 
