@@ -27,7 +27,7 @@ please note:
 - to simulate an ftp server, a dependency to twistd is required and the following command will be used
     to create a ftp server:
     <pre>
-    twistd -n ftp -p 2000 -r /home/myo --password-file=/home/myo/Temp/pass.dat
+    twistd -n ftp -p 2000 -r VMbackupFolder --password-file=/home/myo/Temp/pass.dat
     </pre>
     if you don't know what is twist, please check: http://twistedmatrix.com/
 

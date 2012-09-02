@@ -1,8 +1,9 @@
 from datetime import datetime
+import subprocess
 import VMExplorerFtpBackup
 import unittest
 
-class testVMExplorerFtpBackup(unittest.TestCase):
+class testBackUpMergins(unittest.TestCase):
     def testMergeBackups(self):
         sourceBackUp = {
                         'Bart' :   {
@@ -84,6 +85,25 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         self.assertEqual( bartBackup[dateFromString('21/11/06 16:25')], ['c'])
         self.assertEqual( bartBackup[dateFromString('21/11/06 16:26')], ['d'])
         self.assertEqual( bartBackup[dateFromString('21/11/06 16:31')], ['e'])
+
+
+
+
+class testFtp(unittest.TestCase):
+    def setUp(self):
+        try:
+            #  twistd -n ftp -p 2000 -r VMbackupFolder --password-file=/home/myo/Temp/pass.dat
+            subprocess.Popen('twistd -n ftp -p 2001 -r test/VMbackupFolder/',  shell=True)
+        except Exception as ex:
+            self.fail("Cannot start twistd as a ftp on port 2000. more details: " + ex)
+    def tearDown(self):
+        try:
+            subprocess.call('killall twistd',  shell=True)
+        except Exception as ex:
+            self.fail("Cannot kill twistd as a ftp on port 2000. more details: " + ex)
+
+    def testA(self):
+        self.assertEqual(1,1)
 
 
 
