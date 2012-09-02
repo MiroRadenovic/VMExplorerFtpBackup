@@ -2,6 +2,7 @@ from datetime import datetime
 import subprocess
 import VMExplorerFtpBackup
 import unittest
+import ftputil
 
 class testBackUpMergins(unittest.TestCase):
     def testMergeBackups(self):
@@ -102,8 +103,11 @@ class testFtp(unittest.TestCase):
         except Exception as ex:
             self.fail("Cannot kill twistd as a ftp on port 2000. more details: " + ex)
 
-    def testA(self):
-        self.assertEqual(1,1)
+    def testConnection(self):
+        host = ftputil.FTPHost('localhost', 'anonymous', 'anonymous')
+        names = host.listdir(host.curdir)
+        print names
+
 
 
 
