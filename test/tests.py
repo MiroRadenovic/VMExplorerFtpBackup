@@ -55,6 +55,24 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         self.assertTrue(dateFromString('21/11/46 16:30') in result['Miro'])
         self.assertTrue(dateFromString('21/11/45 16:30') in result['Miro'])
 
+    def testSortAndRemoveOldBackups(self):
+        backup= { 'Bart' :   {
+            dateFromString('21/11/06 16:25') : [ 'bartFile1.txt','bartFile1.2.txt'],
+            dateFromString('21/11/06 16:31') : [ 'bartFile2','file.txt2.2'],
+            dateFromString('21/11/06 16:26') : [ 'bartFile2','file.txt2.2'],
+            dateFromString('23/11/06 16:31') : [ 'bartFile2','file.txt2.2'],
+            dateFromString('24/11/06 16:31') : [ 'bartFile2','file.txt2.2'],
+            dateFromString('21/10/06 16:31') : [ 'bartFile2','file.txt2.2'],
+            dateFromString('21/10/05 16:31') : [ 'bartFile2','file.txt2.2'],
+            dateFromString('21/10/03 16:31') : [ 'bartFile2','file.txt2.2']
+                 }
+            }
+        VMExplorerFtpBackup.sortAndRemoveOldBackups(backup, 5)
+        bartBackup = backup['Bart']
+        self.assertEquals(bartBackup.__len__(), 5)
+        vmKeys = bartBackup.keys()
+        self.assertEqual(vmKeys[0], dateFromString('21/10/04 16:31'))
+
 
 def dateFromString(date):
     return datetime.strptime(date, "%d/%m/%y %H:%M")
