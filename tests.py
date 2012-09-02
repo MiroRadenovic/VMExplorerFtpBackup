@@ -24,36 +24,36 @@ class testVMExplorerFtpBackup(unittest.TestCase):
 
         }
 
-        result = VMExplorerFtpBackup.mergeBackups(sourceBackUp, destinationBackUp)
+        result = VMExplorerFtpBackup.mergeBackup(sourceBackUp, destinationBackUp)
 
         # Bart checking
-        self.assertTrue('Bart' in destinationBackUp)
+        self.assertTrue('Bart' in result)
         # first backup
         dateKey = dateFromString('21/11/06 16:30')
-        self.assertTrue(dateKey in destinationBackUp['Bart'])
-        listOfFiles = destinationBackUp['Bart'][dateKey]
+        self.assertTrue(dateKey in result['Bart'])
+        listOfFiles = result['Bart'][dateKey]
         self.assertEqual(listOfFiles[0], 'bartFile1.txt')
         self.assertEqual(listOfFiles[1], 'bartFile1.2.txt')
 
         # second backup
         dateKey =dateFromString('21/11/06 16:31')
-        self.assertTrue(dateKey in destinationBackUp['Bart'])
-        listOfFiles = destinationBackUp['Bart'][dateKey]
+        self.assertTrue(dateKey in result['Bart'])
+        listOfFiles = result['Bart'][dateKey]
         self.assertEqual(listOfFiles[0], 'bartFile2')
         self.assertEqual(listOfFiles[1], 'file.txt2.2')
 
         #third backup (the merged backup)
         dateKey =dateFromString('22/11/06 10:21')
-        self.assertTrue(dateKey in destinationBackUp['Bart'])
-        listOfFiles = destinationBackUp['Bart'][dateKey]
+        self.assertTrue(dateKey in result['Bart'])
+        listOfFiles = result['Bart'][dateKey]
         self.assertEqual(listOfFiles[0], 'raoulFileMarge,txt')
 
         # other backups..
-        self.assertTrue('Raoul' in destinationBackUp)
-        self.assertTrue(dateFromString('21/11/16 16:30') in destinationBackUp['Raoul'])
-        self.assertTrue('Miro' in destinationBackUp)
-        self.assertTrue(dateFromString('21/11/46 16:30') in destinationBackUp['Miro'])
-        self.assertTrue(dateFromString('21/11/45 16:30') in destinationBackUp['Miro'])
+        self.assertTrue('Raoul' in result)
+        self.assertTrue(dateFromString('21/11/16 16:30') in result['Raoul'])
+        self.assertTrue('Miro' in result)
+        self.assertTrue(dateFromString('21/11/46 16:30') in result['Miro'])
+        self.assertTrue(dateFromString('21/11/45 16:30') in result['Miro'])
 
 
 def dateFromString(date):

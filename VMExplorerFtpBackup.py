@@ -13,12 +13,17 @@ def main(params):
 def startBackup(vmFolderTree, vmDumpFilePath, num):
     backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTree)
     backupsInDumpFile = backupSerializer.getBackupsFromDumpFile(vmDumpFilePath)
-    for key in backupsToUpload.keys():
-        print(backupsToUpload[key])
+    backups = mergeBackup(backupsToUpload, backupsInDumpFile)
 
 
+def mergeBackup(backup1, backup2):
+    result ={}
+    _mergeFirstBackupIntoSecondBackup_(backup1, result)
+    _mergeFirstBackupIntoSecondBackup_(backup2, result)
+    return result
 
-def mergeBackups(backupToJoin, destinationBackupToJoin):
+
+def _mergeFirstBackupIntoSecondBackup_(backupToJoin, destinationBackupToJoin):
     '''
     Merges 2 backup into 1
     Args: backupToJoin [dic] the source
