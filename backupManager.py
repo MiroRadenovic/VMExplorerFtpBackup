@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 
-def getBackupsFromFolderTree( pathToFolder):
+def getBackupsFromFolderTree(pathToFolder):
     ''' given a correct path of a folder that contains VMExplorer backups
         a dictionary containing backup's informations will be returned
         args: [string] pathToFolder: realtive or absolute path to the folder containing virtual machines backups
