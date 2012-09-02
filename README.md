@@ -23,8 +23,8 @@ c:\VirtualMachinesTemp  (root backup folder)
  -----------| file1.vmx
 </pre>
 please note:
-1) tests.py will execute testscases based on this structure, so don't change files and folders name
-2) to simulate an ftp server, a dependency to twistd is required and the following command will be used
+- tests.py will execute testscases based on this structure, so don't change files and folders name
+- to simulate an ftp server, a dependency to twistd is required and the following command will be used
     to create a ftp server:
     twistd -n ftp -p 2000 -r /home/myo --password-file=/home/myo/Temp/pass.dat
     if you don't know what is twist, please check: http://twistedmatrix.com/
