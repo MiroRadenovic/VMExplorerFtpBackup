@@ -10,7 +10,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                                         dateFromString('21/11/06 16:31') : [ 'bartFile2','file.txt2.2']
                                     },
                         'Raoul' :  {
-                                        dateFromString('21/11/16 16:30') :  [ 'raoulFile1,txt']
+                                        dateFromString('21/11/16 16:3') :  [ 'raoulFile1,txt']
                                     }
                         }
         destinationBackUp = {

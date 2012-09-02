@@ -14,13 +14,40 @@ def startBackup(vmFolderTree, vmDumpFilePath, num):
     backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTree)
     backupsInDumpFile = backupSerializer.getBackupsFromDumpFile(vmDumpFilePath)
     backups = mergeBackup(backupsToUpload, backupsInDumpFile)
-
+    removeOldBackups(backups, num)
 
 def mergeBackup(backup1, backup2):
     result ={}
     _mergeFirstBackupIntoSecondBackup_(backup1, result)
     _mergeFirstBackupIntoSecondBackup_(backup2, result)
     return result
+
+def removeOldBackups(backups, maxNumberOfBackupsToKeepForSingleVm):
+    for vmName in backups:
+        vmBackups = backups[vmName]
+        sortDicByKey(vmBackups)
+        removeOldBackups(vmBackups,maxNumberOfBackupsToKeepForSingleVm)
+
+def removeOldBackups(dic, maxNumberOfBackupsToKeep):
+    result = {}
+    currentIndex = 0
+    for key in dic:
+        if currentIndex < maxNumberOfBackupsToKeep:
+            result[key] = dic[key]
+    dic = result
+
+
+def sortDicByKey(dic):
+    result = {}
+    keys = dic.keys()
+    keys.sort()
+    for key in keys:
+        result[key] = dic[key]
+    dic = result
+
+
+
+
 
 
 def _mergeFirstBackupIntoSecondBackup_(backupToJoin, destinationBackupToJoin):
