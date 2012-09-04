@@ -1,8 +1,10 @@
 from datetime import datetime
+import ftplib
 import subprocess
 import VMExplorerFtpBackup
 import unittest
 import ftputil
+import ftplib
 
 class testBackUpMergins(unittest.TestCase):
     def testMergeBackups(self):
@@ -90,6 +92,7 @@ class testBackUpMergins(unittest.TestCase):
 
 
 
+
 class testFtp(unittest.TestCase):
     def setUp(self):
         try:
@@ -104,11 +107,16 @@ class testFtp(unittest.TestCase):
             self.fail("Cannot kill twistd as a ftp on port 2000. more details: " + ex)
 
     def testConnection(self):
-        host = ftputil.FTPHost('localhost', 'anonymous', 'anonymous')
+        host = ftputil.FTPHost('localhost', 'anonymous', 'anonymous', port='2001', session_factory=MySession)
         names = host.listdir(host.curdir)
         print names
 
-
+class MySession(ftplib.FTP):
+    def __init__(self, host, userid, password, port):
+        """Act like ftplib.FTP's constructor but connect to another port."""
+        ftplib.FTP.__init__(self)
+        self.connect(host, port)
+        self.login(userid, password)
 
 
 

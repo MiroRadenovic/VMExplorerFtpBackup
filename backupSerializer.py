@@ -1,5 +1,6 @@
 import pickle
 import logging as log
+import ftputil
 
 def saveBackupToDumpFile(backup, pathToDumpFile='backupDb.dump'):
     'dumps a backup dictionary into file'
@@ -22,4 +23,6 @@ def getBackupsFromDumpFile(pathToDumpFile='backupDb.dump'):
 
 
 def getBackupsFromFtpServer(hostname, user='anonymous', password='anonymous'):
+
+
     pass
