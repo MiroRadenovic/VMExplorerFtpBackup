@@ -1,8 +1,9 @@
 from datetime import datetime
 import subprocess
 import VMExplorerFtpBackup
-import backupSerializer
+import backupManager
 import unittest
+import time
 
 class testBackUpMergins(unittest.TestCase):
     def testMergeBackups(self):
@@ -88,14 +89,13 @@ class testBackUpMergins(unittest.TestCase):
         self.assertEqual( bartBackup[dateFromString('21/11/06 16:31')], ['e'])
 
 
-
-
-
 class testFtp(unittest.TestCase):
     def setUp(self):
         try:
             #  twistd -n ftp -p 2000 -r VMbackupFolder --password-file=/home/myo/Temp/pass.dat
             subprocess.Popen('twistd -n ftp -p 2001 -r test/VMbackupFolder/',  shell=True)
+            # let's wait 3 secs to make sure ftp server starts
+            time.sleep(3)
         except Exception as ex:
             self.fail("Cannot start twistd as a ftp on port 2000. more details: " + ex.message)
     def tearDown(self):
@@ -105,11 +105,8 @@ class testFtp(unittest.TestCase):
             self.fail("Cannot kill twistd as a ftp on port 2000. more details: " + ex.message)
 
     def testConnection(self):
-        backupSerializer.getBackupsFromFtpServer('localhost', port=2001)
-
-
-
-
+        backups = backupManager.getBackupsFromFtpServer('localhost', port=2001)
+        self.assertTrue(backups != None)
 
 
 def dateFromString(date):
