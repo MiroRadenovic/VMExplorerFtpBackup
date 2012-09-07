@@ -88,18 +88,6 @@ def getBackupsDiff(backUpSource, backUpToDiff):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 def _mergeFirstBackupIntoSecondBackup_(backupToJoin, destinationBackupToJoin):
     '''
     Merges 2 backup into 1

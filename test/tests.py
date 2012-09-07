@@ -5,7 +5,30 @@ import backupManager
 import unittest
 import time
 
-class testBackUpMergins(unittest.TestCase):
+def getSampleBackups():
+    backupOne = {
+        'Bart' :   {
+            dateFromString('21/11/06 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+            dateFromString('21/11/06 16:31') : [ 'bartFile2','file.txt2.2']
+        },
+        'Raoul' :  {
+            dateFromString('21/11/16 16:36') :  [ 'raoulFile1,txt']
+        }
+    }
+    backupTwo = {
+        'Miro' :   {
+            dateFromString('21/11/46 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+            dateFromString('21/11/45 16:30') : [ 'bartFile2','file.txt2.2']
+        },
+        'Bart' :  {
+            dateFromString('22/11/06 10:21') :  [ 'raoulFileMarge,txt']
+        }
+
+    }
+    return  (backupOne, backupOne)
+
+
+class testVMExplorerFtpBackup(unittest.TestCase):
     def testMergeBackups(self):
         sourceBackUp = {
                         'Bart' :   {
@@ -23,9 +46,9 @@ class testBackUpMergins(unittest.TestCase):
                                     },
                         'Bart' :  {
                                         dateFromString('22/11/06 10:21') :  [ 'raoulFileMarge,txt']
-                        }
+                                }
 
-        }
+                        }
 
         result = VMExplorerFtpBackup.mergeBackup(sourceBackUp, destinationBackUp)
 
@@ -87,6 +110,39 @@ class testBackUpMergins(unittest.TestCase):
         self.assertEqual( bartBackup[dateFromString('21/11/06 16:25')], ['c'])
         self.assertEqual( bartBackup[dateFromString('21/11/06 16:26')], ['d'])
         self.assertEqual( bartBackup[dateFromString('21/11/06 16:31')], ['e'])
+
+    def testGetBackupsDiff_RemoveOldBackups(self):
+
+        localBackups = {
+            'Bart' :   {
+                dateFromString('21/11/06 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+                dateFromString('21/11/06 16:31') : [ 'bartFile2','file.txt2.2']
+            },
+            'Raoul' :  {
+                dateFromString('21/11/16 16:36') :  [ 'raoulFile1,txt']
+            }
+        }
+        remoteBackups = {
+            # all the  tree must be deleted!
+            'Miro' :   {
+                dateFromString('21/11/46 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+                dateFromString('21/11/45 16:30') : [ 'bartFile2','file.txt2.2']
+            },
+            'Bart' :  {
+                # this backup should NOT be deleted
+                dateFromString('21/11/06 16:31') : [ 'bartFile2','file.txt2.2'],
+                # this backup should be deleted
+                dateFromString('21/11/03 16:31') : [ 'bartFile2','file.txt2.2']
+            }
+        }
+        backupsToDelete = VMExplorerFtpBackup.getBackupsDiff(localBackups, remoteBackups)
+        self.assertTrue(backupsToDelete != None)
+        self.assertTrue(backupsToDelete.has_key('Miro'))
+        self.assertTrue(len(backupsToDelete['Miro']) == 2)
+        self.assertTrue(backupsToDelete.has_key('Bart'))
+        self.assertTrue(len(backupsToDelete['Bart']) == 1)
+        self.assertTrue(backupsToDelete['Bart'][dateFromString('21/11/03 16:31')] != None)
+
 
 
 class testFtp(unittest.TestCase):
