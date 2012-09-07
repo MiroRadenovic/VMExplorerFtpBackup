@@ -1,10 +1,8 @@
 from datetime import datetime
-import ftplib
 import subprocess
 import VMExplorerFtpBackup
+import backupSerializer
 import unittest
-import ftputil
-import ftplib
 
 class testBackUpMergins(unittest.TestCase):
     def testMergeBackups(self):
@@ -99,24 +97,18 @@ class testFtp(unittest.TestCase):
             #  twistd -n ftp -p 2000 -r VMbackupFolder --password-file=/home/myo/Temp/pass.dat
             subprocess.Popen('twistd -n ftp -p 2001 -r test/VMbackupFolder/',  shell=True)
         except Exception as ex:
-            self.fail("Cannot start twistd as a ftp on port 2000. more details: " + ex)
+            self.fail("Cannot start twistd as a ftp on port 2000. more details: " + ex.message)
     def tearDown(self):
         try:
             subprocess.call('killall twistd',  shell=True)
         except Exception as ex:
-            self.fail("Cannot kill twistd as a ftp on port 2000. more details: " + ex)
+            self.fail("Cannot kill twistd as a ftp on port 2000. more details: " + ex.message)
 
     def testConnection(self):
-        host = ftputil.FTPHost('localhost', 'anonymous', 'anonymous', port='2001', session_factory=MySession)
-        names = host.listdir(host.curdir)
-        print names
+        backupSerializer.getBackupsFromFtpServer('localhost', port=2001)
 
-class MySession(ftplib.FTP):
-    def __init__(self, host, userid, password, port):
-        """Act like ftplib.FTP's constructor but connect to another port."""
-        ftplib.FTP.__init__(self)
-        self.connect(host, port)
-        self.login(userid, password)
+
+
 
 
 
