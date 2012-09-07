@@ -1,16 +1,6 @@
 import os
 from datetime import datetime
-import ftputil
-import ftplib
-
-
-class FtpSession(ftplib.FTP):
-    def __init__(self, host, userid, password, port):
-        """Act like ftplib.FTP's constructor but connect to another port."""
-        ftplib.FTP.__init__(self)
-        self.connect(host, port)
-        self.login(userid, password)
-
+import ftpHelper
 
 def getBackupsFromFolderTree(pathToFolder):
     ''' given a correct path of a folder that contains VMExplorer backups
@@ -25,9 +15,8 @@ def getBackupsFromFolderTree(pathToFolder):
         resultBackups[vm] = serverBackup
     return resultBackups
 
-def getBackupsFromFtpServer(hostname, user='anonymous', password='anonymous', port=21):
+def getBackupsFromFtpServer(host):
     result = {}
-    host = ftputil.FTPHost(hostname, user, password, port=port, session_factory=FtpSession)
     names = host.listdir(host.curdir)
     for serverName in names:
         backupDates = host.listdir(serverName)
@@ -38,7 +27,6 @@ def getBackupsFromFtpServer(hostname, user='anonymous', password='anonymous', po
             backupsInServer[currentDate] = files
         result[serverName] = backupsInServer
     return result
-
 
 def _getFilesFromFolder_(pathToBackUpFiles):
     filesToBackUp = []

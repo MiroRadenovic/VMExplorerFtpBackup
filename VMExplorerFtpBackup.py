@@ -1,7 +1,11 @@
 import optparse
+import logging
+
 import backupManager
 import backupSerializer
-import logging
+import config
+import ftpHelper
+
 
 logging.basicConfig(level=logging.DEBUG,format='%(message)s')
 
@@ -15,6 +19,7 @@ def startBackup(vmFolderTree, vmDumpFilePath, num):
     backupsInDumpFile = backupSerializer.getBackupsFromDumpFile(vmDumpFilePath)
     backups = mergeBackup(backupsToUpload, backupsInDumpFile)
     sortAndRemoveOldBackups(backups, num)
+    uploadBackups(vmFolderTree, backups)
 
 def mergeBackup(backup1, backup2):
     result ={}
@@ -42,6 +47,57 @@ def takeFirstBackups(dic, numberOfBackupsToTake):
             currentIndex +=1
         else: return result
     return result
+
+def uploadBackups(vmFolderTree, backups):
+    # controllare questa  parte
+
+    for vmName in backups:
+        # first lets delete old backups on the remote backup
+        if config.VmToFtp.has_key(vmName):
+            connectionInfo = config.VmToFtp[vmName]
+        else:
+            connectionInfo = config.VmToFtp['*']
+        ftphost = ftpHelper.getFtp(hostname=connectionInfo[0], port=connectionInfo[1],user=connectionInfo[2], password=connectionInfo[3], remoteFolder=[4])
+
+
+        backupsOnServer = backupManager.getBackupsFromFtpServer(ftphost)
+        backupsToDelete = getBackupsDiff(backups, backupsOnServer)
+        backupsToUpload = getBackupsDiff(backupsOnServer, backups)
+        # lets delete
+        for bkToDelete in backupsToDelete:
+            ftphost.rmtree(bkToDelete + '/' + backupToDelete[bkToDelete])
+
+        for vmName in backupsToUpload:
+            for date in bkToUpload:
+                ftphost.upload(bkToUpload + '/' + date, )
+
+
+
+def getBackupsDiff(backUpSource, backUpToDiff):
+    result = {}
+    for vmName in backUpToDiff:
+        if backUpSource.has_key(vmName):
+            foldersToDelete = {}
+            for date in backUpToDiff[vmName]:
+                if not backUpSource[vmName].has_key(date):
+                    foldersToDelete[date] =  backUpToDiff[vmName][date]
+            if len(foldersToDelete) > 0 : result[vmName] = foldersToDelete
+        else: result[vmName] = backUpToDiff[vmName]
+    return result
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def _mergeFirstBackupIntoSecondBackup_(backupToJoin, destinationBackupToJoin):
