@@ -143,6 +143,37 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         self.assertTrue(len(backupsToDelete['Bart']) == 1)
         self.assertTrue(backupsToDelete['Bart'][dateFromString('21/11/03 16:31')] != None)
 
+    def testGetBackupsDiff_UploadNewBackups(self):
+        localBackups = {
+            'Bart' :   {
+                # this backup must NOT be uploaded
+                dateFromString('21/11/06 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+                #this backup must be uploaded
+                dateFromString('21/11/06 16:32') : [ 'bartFile2','file.txt2.2']
+            },
+            'Raoul' :  {
+                #this backup should be uploaded
+                dateFromString('21/11/16 16:36') :  [ 'raoulFile1,txt']
+            }
+        }
+        remoteBackups = {
+            'Miro' :   {
+                dateFromString('21/11/46 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+                dateFromString('21/11/45 16:30') : [ 'bartFile2','file.txt2.2']
+            },
+            'Bart' :  {
+                dateFromString('21/11/06 16:30') : [ 'bartFile2','file.txt2.2'],
+                dateFromString('21/11/03 16:31') : [ 'bartFile2','file.txt2.2']
+            }
+        }
+        backupToUpload = VMExplorerFtpBackup.getBackupsDiff(remoteBackups, localBackups)
+        self.assertTrue(backupToUpload != None)
+        self.assertTrue(backupToUpload.has_key('Bart'))
+        self.assertTrue(len(backupToUpload['Bart']) == 1)
+        self.assertTrue(backupToUpload['Bart'][dateFromString('21/11/06 16:32')] != None)
+        self.assertTrue(backupToUpload.has_key('Raoul'))
+        self.assertTrue(len(backupToUpload['Raoul']) == 1)
+        self.assertTrue(backupToUpload['Raoul'][dateFromString('21/11/16 16:36')] != None)
 
 
 class testFtp(unittest.TestCase):
