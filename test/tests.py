@@ -5,29 +5,6 @@ import backupManager
 import unittest
 import time
 
-def getSampleBackups():
-    backupOne = {
-        'Bart' :   {
-            dateFromString('21/11/06 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
-            dateFromString('21/11/06 16:31') : [ 'bartFile2','file.txt2.2']
-        },
-        'Raoul' :  {
-            dateFromString('21/11/16 16:36') :  [ 'raoulFile1,txt']
-        }
-    }
-    backupTwo = {
-        'Miro' :   {
-            dateFromString('21/11/46 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
-            dateFromString('21/11/45 16:30') : [ 'bartFile2','file.txt2.2']
-        },
-        'Bart' :  {
-            dateFromString('22/11/06 10:21') :  [ 'raoulFileMarge,txt']
-        }
-
-    }
-    return  (backupOne, backupOne)
-
-
 class testVMExplorerFtpBackup(unittest.TestCase):
     def testMergeBackups(self):
         sourceBackUp = {

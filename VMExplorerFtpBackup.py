@@ -19,7 +19,7 @@ def startBackup(vmFolderTree, vmDumpFilePath, num):
     backupsInDumpFile = backupSerializer.getBackupsFromDumpFile(vmDumpFilePath)
     backups = mergeBackup(backupsToUpload, backupsInDumpFile)
     sortAndRemoveOldBackups(backups, num)
-    uploadBackups(vmFolderTree, backups)
+    syncBackupsToFtp(vmFolderTree, backups)
 
 def mergeBackup(backup1, backup2):
     result ={}
@@ -48,32 +48,39 @@ def takeFirstBackups(dic, numberOfBackupsToTake):
         else: return result
     return result
 
-def uploadBackups(vmFolderTree, backups):
+def syncBackupsToFtp(vmFolderTree, backups):
     # controllare questa  parte
 
     for vmName in backups:
-        # first lets delete old backups on the remote backup
+        # let's see if we have a connection info for this backup
         if config.VmToFtp.has_key(vmName):
             connectionInfo = config.VmToFtp[vmName]
         else:
             connectionInfo = config.VmToFtp['*']
+        # connect to ftp server
         ftphost = ftpHelper.getFtp(hostname=connectionInfo[0], port=connectionInfo[1],user=connectionInfo[2], password=connectionInfo[3], remoteFolder=[4])
 
 
         backupsOnServer = backupManager.getBackupsFromFtpServer(ftphost)
         backupsToDelete = getBackupsDiff(backups, backupsOnServer)
         backupsToUpload = getBackupsDiff(backupsOnServer, backups)
-        # lets delete
+
+
         for bkToDelete in backupsToDelete:
             ftphost.rmtree(bkToDelete + '/' + backupToDelete[bkToDelete])
 
-        for vmName in backupsToUpload:
-            for date in bkToUpload:
-                ftphost.upload(bkToUpload + '/' + date, )
+        # let's upload all the ba
+        for candidateUploadVmName in backupsToUpload:
+            if candidateUploadVmName == vmName:
+                for dateBackup in backupsToUpload[candidateUploadVmName]:
+                    ftphost.upload(bkToUpload + '/' + dateBackup )
 
 
 
 def getBackupsDiff(backUpSource, backUpToDiff):
+    '''
+    return a diff between to backUpSource and backUpToDiff
+    '''
     result = {}
     for vmName in backUpToDiff:
         if backUpSource.has_key(vmName):
@@ -90,7 +97,7 @@ def getBackupsDiff(backUpSource, backUpToDiff):
 
 def _mergeFirstBackupIntoSecondBackup_(backupToJoin, destinationBackupToJoin):
     '''
-    Merges 2 backup into 1
+    Merges 2 backups into 1
     Args: backupToJoin [dic] the source
      destinationBackupToJoin [dic] the result of the merge
     '''
