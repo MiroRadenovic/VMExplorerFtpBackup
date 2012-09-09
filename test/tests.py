@@ -4,9 +4,7 @@ import VMExplorerFtpBackup
 import backupManager
 import unittest
 import time
-from mock import MagicMock
 from mock import patch
-import config
 
 def dateFromString(date):
     return datetime.strptime(date, "%d/%m/%y %H:%M")
@@ -27,6 +25,7 @@ mockConfig  = {
 
 class testVMExplorerFtpBackup(unittest.TestCase):
     def testMergeBackups(self):
+        '''ensures merge between two backups produces expected result'''
         sourceBackUp = {
                         'Bart' :   {
                                         dateFromString('21/11/06 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
@@ -79,7 +78,9 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         self.assertTrue(dateFromString('21/11/45 16:30') in result['Miro'])
 
     def testSortAndRemoveOldBackups(self):
-        #arrange
+        '''ensures that by a given backup VMExplorerFtpBackup.sortAndRemoveOldBackups can sort backups by date and keep
+        just a specified number of backups by removing old ones
+        '''
         backup= { 'Bart' :   {
             dateFromString('21/11/06 16:25') : [ 'c' ],
             dateFromString('25/11/06 16:31') : [ 'skip'],
@@ -109,7 +110,11 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         self.assertEqual( bartBackup[dateFromString('21/11/06 16:31')], ['e'])
 
     def testGetBackupsDiff_RemoveOldBackups(self):
-
+        '''
+        makes sure that function VMExplorerFtpBackup.getBackupsDiff can create correctly a diff between 2 backups
+        so that this function can be used for getting a backup dic containing backups that needs to be deleted, because
+        they are already present in the ftp
+        '''
         localBackups = {
             'Bart' :   {
                 dateFromString('21/11/06 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
@@ -141,6 +146,11 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         self.assertTrue(backupsToDelete['Bart'][dateFromString('21/11/03 16:31')] != None)
 
     def testGetBackupsDiff_UploadNewBackups(self):
+        '''
+        makes sure that function VMExplorerFtpBackup.getBackupsDiff can create correctly a diff between 2 backups
+        so that this function can be used for getting a backup dic containing backups that needs to be uploaded on a
+        remote ftp server
+        '''
         localBackups = {
             'Bart' :   {
                 # this backup must NOT be uploaded
@@ -175,6 +185,11 @@ class testVMExplorerFtpBackup(unittest.TestCase):
     @patch('config.VmToFtp', mockConfig)
     @patch('ftpHelper.getFtp', mockFtp)
     def testSyncBackupsToFtp(self):
+        '''
+        ensures that when VMExplorerFtpBackup syncs backsup to the remote server:
+        1) deletes old backups on the rmeote server
+        2) uploads only new backups that are not already present.
+        '''
         with patch.object(backupManager, 'getBackupsFromFtpServer')  as mock_method:
             mock_method.return_value = {
                 'Bart' :   {
@@ -195,17 +210,13 @@ class testVMExplorerFtpBackup(unittest.TestCase):
             }
             VMExplorerFtpBackup.syncBackupsToFtp('/', localBackups)
 
-
-
-
-
 class testFtp(unittest.TestCase):
     def setUp(self):
         try:
             #  twistd -n ftp -p 2000 -r VMbackupFolder --password-file=/home/myo/Temp/pass.dat
             subprocess.Popen('twistd -n ftp -p 2001 -r test/VMbackupFolder/',  shell=True)
-            # let's wait 3 secs to make sure ftp server starts
-            time.sleep(3)
+            # let's wait 1 secs to make sure ftp server starts
+            time.sleep(1)
         except Exception as ex:
             self.fail("Cannot start twistd as a ftp on port 2000. more details: " + ex.message)
     def tearDown(self):
