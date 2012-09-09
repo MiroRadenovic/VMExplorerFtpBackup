@@ -73,7 +73,8 @@ def syncBackupsToFtp(vmPathBackupFolderTree, backups):
         for candidateUploadVmName in backupsToUpload:
             if candidateUploadVmName == vmName:
                 for dateBackup in backupsToUpload[candidateUploadVmName]:
-                    ftphost.upload(vmPathBackupFolderTree + '/' + dateBackup.strftime("%d/%m/%y %H:%M") )
+                    # format datetime as 2000-08-28-154138
+                    ftphost.upload(vmPathBackupFolderTree + '/' + dateBackup.strftime("%Y-%m-%d-%H%M%S") )
 
 
 

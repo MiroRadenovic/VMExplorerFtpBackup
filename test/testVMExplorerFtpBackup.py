@@ -5,17 +5,23 @@ import backupManager
 import unittest
 
 from mock import patch
+import ftpHelper
 
 def dateFromString(date):
-    return datetime.strptime(date, "%d/%m/%y %H:%M")
+    return datetime.strptime(date, "%d/%m/%Y %H:%M")
 
 # global mocks
 class mockFtp():
-    def __init__(self, hostname,port,user,password,remoteFolder):
-        pass
-    def rmtree(self, string):
-        print('rmtree invoked')
-    def upload(self, string):
+    def __init__(self, testCase):
+        self.testCase = testCase
+    def rmtree(self, path):
+        if not path.endswith('a'):
+            self.fail()
+    def upload(self, path):
+        #2000-08-28-154138 21/11/16 16:36
+        aa = 'sasasa'
+        if not path.endswith('2006-11-21-163000') or not path.endswith('2016-11-21-163600'):
+            self.fail('XX')
         print('upload invoked')
 
 mockConfig  = {
@@ -183,7 +189,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         self.assertTrue(backupToUpload['Raoul'][dateFromString('21/11/16 16:36')] != None)
 
     @patch('config.VmToFtp', mockConfig)
-    @patch('ftpHelper.getFtp', mockFtp)
+    #@patch('ftpHelper.getFtp', mockFtp)
     def testSyncBackupsToFtp(self):
         '''
         ensures that when VMExplorerFtpBackup syncs backsup to the remote server:
@@ -191,23 +197,26 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         2) uploads only new backups that are not already present.
         '''
         with patch.object(backupManager, 'getBackupsFromFtpServer')  as mock_method:
-            mock_method.return_value = {
-                'Bart' :   {
-                    dateFromString('21/11/06 16:30') : [ 'bartFile1.txt','bartFile1.2.txt']
+            # http://docs.python.org/dev/library/unittest.mock
+            with patch.object(ftpHelper, 'getFtp', return_value =  mockFtp(self)):
+                mock_method.return_value = {
+                    'Bart' :   {
+                        dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt']
+                    }
                 }
-            }
-            localBackups = {
-                'Bart' :   {
-                    # this backup must NOT be uploaded
-                    dateFromString('21/11/06 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
-                    #this backup must be uploaded
-                    dateFromString('21/11/06 16:32') : [ 'bartFile2','file.txt2.2']
-                },
-                'Raoul' :  {
-                    #this backup should be uploaded
-                    dateFromString('21/11/16 16:36') :  [ 'raoulFile1,txt']
+
+                localBackups = {
+                    'Bart' :   {
+                        # this backup must NOT be uploaded
+                        dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+                        #this backup must be uploaded
+                        dateFromString('21/11/2006 16:32') : [ 'bartFile2','file.txt2.2']
+                    },
+                    'Raoul' :  {
+                        #this backup must be uploaded
+                        dateFromString('21/11/2016 16:36') :  [ 'raoulFile1,txt']
+                    }
                 }
-            }
-            VMExplorerFtpBackup.syncBackupsToFtp('/', localBackups)
+                VMExplorerFtpBackup.syncBackupsToFtp('/', localBackups)
 
 
