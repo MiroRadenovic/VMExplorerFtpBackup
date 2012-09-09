@@ -11,6 +11,20 @@ import config
 def dateFromString(date):
     return datetime.strptime(date, "%d/%m/%y %H:%M")
 
+# global mocks
+class mockFtp():
+    def __init__(self, hostname,port,user,password,remoteFolder):
+        pass
+    def rmtree(self, string):
+        print('rmtree invoked')
+    def upload(self, string):
+        print('upload invoked')
+
+mockConfig  = {
+    '*' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
+    }
+
+
 class testVMExplorerFtpBackup(unittest.TestCase):
     def testMergeBackups(self):
         sourceBackUp = {
@@ -158,45 +172,28 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         self.assertTrue(len(backupToUpload['Raoul']) == 1)
         self.assertTrue(backupToUpload['Raoul'][dateFromString('21/11/16 16:36')] != None)
 
-
-    mockConfig  = {
-        '*' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
-        }
-    class mockFtp():
-        def __init__(self, hostname,port,user,password,remoteFolder):
-            pass
-        def rmtree(self, string):
-            print('rmtree invoked')
-        def upload(self, string):
-            print('upload invoked')
-
-    remoteBackups = {
-        'Bart' :   {
-            # this backup must NOT be uploaded
-            'as' : [ 'bartFile1.txt','bartFile1.2.txt']
-        }
-    }
-
     @patch('config.VmToFtp', mockConfig)
     @patch('ftpHelper.getFtp', mockFtp)
-    #@patch('backupManager.getBackupsFromFtpServer',remoteBackups)
-    @patch('backupManager.getBackupsFromFtpServer',mockConfig)
     def testSyncBackupsToFtp(self):
-
-        localBackups = {
-            'Bart' :   {
-                # this backup must NOT be uploaded
-                dateFromString('21/11/06 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
-                #this backup must be uploaded
-                dateFromString('21/11/06 16:32') : [ 'bartFile2','file.txt2.2']
-            },
-            'Raoul' :  {
-                #this backup should be uploaded
-                dateFromString('21/11/16 16:36') :  [ 'raoulFile1,txt']
+        with patch.object(backupManager, 'getBackupsFromFtpServer')  as mock_method:
+            mock_method.return_value = {
+                'Bart' :   {
+                    dateFromString('21/11/06 16:30') : [ 'bartFile1.txt','bartFile1.2.txt']
+                }
             }
-        }
-
-        VMExplorerFtpBackup.syncBackupsToFtp('asas', localBackups)
+            localBackups = {
+                'Bart' :   {
+                    # this backup must NOT be uploaded
+                    dateFromString('21/11/06 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+                    #this backup must be uploaded
+                    dateFromString('21/11/06 16:32') : [ 'bartFile2','file.txt2.2']
+                },
+                'Raoul' :  {
+                    #this backup should be uploaded
+                    dateFromString('21/11/16 16:36') :  [ 'raoulFile1,txt']
+                }
+            }
+            VMExplorerFtpBackup.syncBackupsToFtp('/', localBackups)
 
 
 

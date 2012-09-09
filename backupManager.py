@@ -1,6 +1,5 @@
 import os
 from datetime import datetime
-import ftpHelper
 
 def getBackupsFromFolderTree(pathToFolder):
     ''' given a correct path of a folder that contains VMExplorer backups
@@ -36,7 +35,6 @@ def _getFilesFromFolder_(pathToBackUpFiles):
 
 def _getBackupsFromVirtualMachineFolder_(pathToVmFolder):
     result = {}
-    filesToBackUp =""
     for date in os.listdir(pathToVmFolder):
         try:
             dateTime = datetime.strptime(date, '%Y-%m-%d-%H%M%S')

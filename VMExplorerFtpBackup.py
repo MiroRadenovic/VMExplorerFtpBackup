@@ -48,7 +48,7 @@ def takeFirstBackups(dic, numberOfBackupsToTake):
         else: return result
     return result
 
-def syncBackupsToFtp(vmFolderTree, backups):
+def syncBackupsToFtp(vmPathBackupFolderTree, backups):
     # controllare questa  parte
 
     for vmName in backups:
@@ -73,7 +73,7 @@ def syncBackupsToFtp(vmFolderTree, backups):
         for candidateUploadVmName in backupsToUpload:
             if candidateUploadVmName == vmName:
                 for dateBackup in backupsToUpload[candidateUploadVmName]:
-                    ftphost.upload(bkToUpload + '/' + dateBackup )
+                    ftphost.upload(vmPathBackupFolderTree + '/' + dateBackup.strftime("%d/%m/%y %H:%M") )
 
 
 
