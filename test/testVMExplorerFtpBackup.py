@@ -15,11 +15,28 @@ class mockFtp():
     def __init__(self, testCase):
         self.currrentTestCase = testCase
     def rmtree(self, path):
-        # dateFromString('11/11/2001 16:30')
+        '''
+        make sure that only this backups will be uploaded:
+        'Raoul' :  {
+                        #this backup must be uploaded, because it's not already present in the ftp server
+                        dateFromString('21/11/2016 16:36') :  [ 'uploadME.txt']
+                    }
+
+         'Bart' :   {
+                        dateFromString('21/11/2006 16:32') : [  'uploadME2.txt']
+                    },
+
+        '''
         if not path.endswith('2001-11-11-163000'):
             self.currrentTestCase.fail('a request to the wrong backup deletions has been invoked: {0}'.format(path) )
     def upload(self, path):
-        if not (path.endswith('2016-11-21-163600') or path.endswith('2006-11-21-163000')):
+        '''
+        make sure that only this backups will be deleted:
+         'Bart' :   {
+                        dateFromString('11/11/2001 16:30') : [ 'deleteME.txt']
+                    }
+        '''
+        if not (path.endswith('2016-11-21-163600') or path.endswith('2006-11-21-163200')):
             self.currrentTestCase.fail('a request to the wrong backup upload has been invoked: {0}'.format(path) )
         print('upload invoked')
 
@@ -182,10 +199,10 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         self.assertTrue(backupToUpload != None)
         self.assertTrue(backupToUpload.has_key('Bart'))
         self.assertTrue(len(backupToUpload['Bart']) == 1)
-        self.assertTrue(backupToUpload['Bart'][dateFromString('21/11/06 16:32')] != None)
+        self.assertTrue(backupToUpload['Bart'][dateFromString('21/11/2006 16:32')] != None)
         self.assertTrue(backupToUpload.has_key('Raoul'))
         self.assertTrue(len(backupToUpload['Raoul']) == 1)
-        self.assertTrue(backupToUpload['Raoul'][dateFromString('21/11/16 16:36')] != None)
+        self.assertTrue(backupToUpload['Raoul'][dateFromString('21/11/2016 16:36')] != None)
 
     @patch('config.VmToFtp', mockConfig)
     def testSyncBackupsToFtp(self):
@@ -203,7 +220,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                         # this backup must NOT be deleted, because is also in the local backup
                         dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
                         #this backup must be deleted. there are no information related this backup in the localBackups
-                        dateFromString('11/11/2001 16:30') : [ 'bartFile1.txt','bartFile1.2.txt']
+                        dateFromString('11/11/2001 16:30') : [ 'deleteME.txt']
                     }
                 }
                 # this represents the local backups.
@@ -212,11 +229,11 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                         # this backup must NOT be uploaded, because it's already in ftp server
                         dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
                         #this backup must be uploaded, because it's not already present in the ftp server
-                        dateFromString('21/11/2006 16:32') : [ 'bartFile2','file.txt2.2']
+                        dateFromString('21/11/2006 16:32') : [  'uploadME2.txt']
                     },
                     'Raoul' :  {
                         #this backup must be uploaded, because it's not already present in the ftp server
-                        dateFromString('21/11/2016 16:36') :  [ 'raoulFile1,txt']
+                        dateFromString('21/11/2016 16:36') :  [ 'uploadME.txt']
                     }
                 }
                 VMExplorerFtpBackup.syncBackupsToFtp('/', localBackups)

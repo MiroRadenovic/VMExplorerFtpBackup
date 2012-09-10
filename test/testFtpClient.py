@@ -11,7 +11,7 @@ class testFtp(unittest.TestCase):
         try:
             #  twistd -n ftp -p 2000 -r VMbackupFolder --password-file=/home/myo/Temp/pass.dat
             subprocess.Popen('twistd -n ftp -p 2001 -r test/VMbackupFolder/',  shell=True)
-            # let's wait 1 secs to make sure ftp server starts
+            # let's wait 1 sec to make sure ftp server starts before we attemp to connect
             time.sleep(1)
         except Exception as ex:
             self.fail("Cannot start twistd as a ftp on port 2000. more details: " + ex.message)
