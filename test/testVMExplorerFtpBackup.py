@@ -11,34 +11,7 @@ def dateFromString(date):
     return datetime.strptime(date, "%d/%m/%Y %H:%M")
 
 # global mocks
-class mockFtp():
-    def __init__(self, testCase):
-        self.currrentTestCase = testCase
-    def rmtree(self, path):
-        '''
-        make sure that only this backups will be uploaded:
-        'Raoul' :  {
-                        #this backup must be uploaded, because it's not already present in the ftp server
-                        dateFromString('21/11/2016 16:36') :  [ 'uploadME.txt']
-                    }
 
-         'Bart' :   {
-                        dateFromString('21/11/2006 16:32') : [  'uploadME2.txt']
-                    },
-
-        '''
-        if not path.endswith('2001-11-11-163000'):
-            self.currrentTestCase.fail('a request to the wrong backup deletions has been invoked: {0}'.format(path) )
-    def upload(self, path):
-        '''
-        make sure that only this backups will be deleted:
-         'Bart' :   {
-                        dateFromString('11/11/2001 16:30') : [ 'deleteME.txt']
-                    }
-        '''
-        if not (path.endswith('2016-11-21-163600') or path.endswith('2006-11-21-163200')):
-            self.currrentTestCase.fail('a request to the wrong backup upload has been invoked: {0}'.format(path) )
-        print('upload invoked')
 
 mockConfig  = {
     '*' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
@@ -211,6 +184,36 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         1) deletes old backups on the rmeote server
         2) uploads only new backups that are not already present.
         '''
+
+        class mockFtp():
+            def __init__(self, testCase):
+                self.currrentTestCase = testCase
+            def rmtree(self, path):
+                '''
+                make sure that only this backups will be uploaded:
+                'Raoul' :  {
+                                #this backup must be uploaded, because it's not already present in the ftp server
+                                dateFromString('21/11/2016 16:36') :  [ 'uploadME.txt']
+                            }
+
+                 'Bart' :   {
+                                dateFromString('21/11/2006 16:32') : [  'uploadME2.txt']
+                            },
+
+                '''
+                if not path.endswith('2001-11-11-163000'):
+                    self.currrentTestCase.fail('a request to the wrong backup deletions has been invoked: {0}'.format(path) )
+            def upload(self, path):
+                '''
+                make sure that only this backups will be deleted:
+                 'Bart' :   {
+                                dateFromString('11/11/2001 16:30') : [ 'deleteME.txt']
+                            }
+                '''
+                if not (path.endswith('2016-11-21-163600') or path.endswith('2006-11-21-163200')):
+                    self.currrentTestCase.fail('a request to the wrong backup upload has been invoked: {0}'.format(path) )
+                print('upload invoked')
+
         with patch.object(backupManager, 'getBackupsFromFtpServer')  as mock_method:
             # http://docs.python.org/dev/library/unittest.mock
             with patch.object(ftpHelper, 'getFtp', return_value =  mockFtp(self)):
