@@ -13,15 +13,14 @@ def dateFromString(date):
 # global mocks
 class mockFtp():
     def __init__(self, testCase):
-        self.testCase = testCase
+        self.currrentTestCase = testCase
     def rmtree(self, path):
-        if not path.endswith('a'):
-            self.fail()
+        # dateFromString('11/11/2001 16:30')
+        if not path.endswith('2001-11-11-163000'):
+            self.currrentTestCase.fail('a request to the wrong backup deletions has been invoked: {0}'.format(path) )
     def upload(self, path):
-        #2000-08-28-154138 21/11/16 16:36
-        aa = 'sasasa'
-        if not path.endswith('2006-11-21-163000') or not path.endswith('2016-11-21-163600'):
-            self.fail('XX')
+        if not (path.endswith('2016-11-21-163600') or path.endswith('2006-11-21-163000')):
+            self.currrentTestCase.fail('a request to the wrong backup upload has been invoked: {0}'.format(path) )
         print('upload invoked')
 
 mockConfig  = {
@@ -189,7 +188,6 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         self.assertTrue(backupToUpload['Raoul'][dateFromString('21/11/16 16:36')] != None)
 
     @patch('config.VmToFtp', mockConfig)
-    #@patch('ftpHelper.getFtp', mockFtp)
     def testSyncBackupsToFtp(self):
         '''
         ensures that when VMExplorerFtpBackup syncs backsup to the remote server:
@@ -199,21 +197,25 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         with patch.object(backupManager, 'getBackupsFromFtpServer')  as mock_method:
             # http://docs.python.org/dev/library/unittest.mock
             with patch.object(ftpHelper, 'getFtp', return_value =  mockFtp(self)):
+                # this are the backups stored on the ftp server
                 mock_method.return_value = {
                     'Bart' :   {
-                        dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt']
+                        # this backup must NOT be deleted, because is also in the local backup
+                        dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+                        #this backup must be deleted. there are no information related this backup in the localBackups
+                        dateFromString('11/11/2001 16:30') : [ 'bartFile1.txt','bartFile1.2.txt']
                     }
                 }
-
+                # this represents the local backups.
                 localBackups = {
                     'Bart' :   {
-                        # this backup must NOT be uploaded
+                        # this backup must NOT be uploaded, because it's already in ftp server
                         dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
-                        #this backup must be uploaded
+                        #this backup must be uploaded, because it's not already present in the ftp server
                         dateFromString('21/11/2006 16:32') : [ 'bartFile2','file.txt2.2']
                     },
                     'Raoul' :  {
-                        #this backup must be uploaded
+                        #this backup must be uploaded, because it's not already present in the ftp server
                         dateFromString('21/11/2016 16:36') :  [ 'raoulFile1,txt']
                     }
                 }

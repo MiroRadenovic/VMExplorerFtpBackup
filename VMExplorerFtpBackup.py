@@ -49,27 +49,18 @@ def takeFirstBackups(dic, numberOfBackupsToTake):
     return result
 
 def syncBackupsToFtp(vmPathBackupFolderTree, backups):
-    # controllare questa  parte
-
     for vmName in backups:
-        # let's see if we have a connection info for this backup
-        if config.VmToFtp.has_key(vmName):
-            connectionInfo = config.VmToFtp[vmName]
-        else:
-            connectionInfo = config.VmToFtp['*']
-        # connect to ftp server
-        ftphost = ftpHelper.getFtp(hostname=connectionInfo[0], port=connectionInfo[1],user=connectionInfo[2], password=connectionInfo[3], remoteFolder=[4])
-
-
+        ftphost = get_ftpHost_by_vmName(vmName)
         backupsOnServer = backupManager.getBackupsFromFtpServer(ftphost)
         backupsToDelete = getBackupsDiff(backups, backupsOnServer)
         backupsToUpload = getBackupsDiff(backupsOnServer, backups)
 
-
+        # first delete the backups that are on the remote ftp server that are not present in the backups dic
         for bkToDelete in backupsToDelete:
-            ftphost.rmtree(bkToDelete + '/' + backupToDelete[bkToDelete])
+            for dateBackup in backupsToDelete[bkToDelete]:
+                ftphost.rmtree(vmPathBackupFolderTree + '/' +  dateBackup.strftime("%Y-%m-%d-%H%M%S"))
 
-        # let's upload all the ba
+        #then upload the backups that are not present in the remote ftp
         for candidateUploadVmName in backupsToUpload:
             if candidateUploadVmName == vmName:
                 for dateBackup in backupsToUpload[candidateUploadVmName]:
@@ -80,7 +71,7 @@ def syncBackupsToFtp(vmPathBackupFolderTree, backups):
 
 def getBackupsDiff(backUpSource, backUpToDiff):
     '''
-    return a diff between to backUpSource and backUpToDiff
+    return a diff between the backUpSource and backUpToDiff
     '''
     result = {}
     for vmName in backUpToDiff:
@@ -93,6 +84,20 @@ def getBackupsDiff(backUpSource, backUpToDiff):
         else: result[vmName] = backUpToDiff[vmName]
     return result
 
+
+
+def get_ftpHost_by_vmName(vmName):
+    '''
+    by a given vmName, return associated ftpHost
+    '''
+    if config.VmToFtp.has_key(vmName):
+        connectionInfo = config.VmToFtp[vmName]
+    else:
+        connectionInfo = config.VmToFtp['*']
+        # connect to ftp server
+    ftphost = ftpHelper.getFtp(hostname=connectionInfo[0], port=connectionInfo[1], user=connectionInfo[2],
+        password=connectionInfo[3], remoteFolder=[4])
+    return ftphost
 
 
 
