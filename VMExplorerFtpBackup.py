@@ -9,30 +9,61 @@ import ftpHelper
 
 logging.basicConfig(level=logging.DEBUG,format='%(message)s')
 
+# program start
 
 def main(params):
     if(params.rebuildDumpFile):
-        rebuildDumpFile()
+        rebuild_dump_file_from_backups_on_ftphosts()
     if(params.start):
-        startBackup(params.folder, params.dumpfilepath, params.numberOfBackups)
+        start_backup(params.folder, params.dumpfilepath, params.numberOfBackups)
     if(params.status):
-        showStatus():
+        display_dump_file(params.dumpfilepath)
 
+# programs options
 
-def startBackup(vmFolderTree, vmDumpFilePath, num):
+def start_backup(vmFolderTree, vmDumpFilePath, num):
     backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTree)
     backupsInDumpFile = backupSerializer.getBackupsFromDumpFile(vmDumpFilePath)
     backups = mergeBackup(backupsToUpload, backupsInDumpFile)
     sortAndRemoveOldBackups(backups, num)
     syncBackupsToFtp(vmFolderTree, backups)
+    # todo: must save
+
+
+def rebuild_dump_file_from_backups_on_ftphosts(dumpfilepath):
+    '''
+    rebuilds a new dump file by scanning all ftp server's
+    '''
+    backups = {}
+    for vmName in config.VmToFtp:
+        if not vmName == '*':
+            host = get_ftpHost_by_vmName(vmName)
+            backupsInFtpHost = backupManager.getBackupsFromFtpServer(host)
+            _mergeFirstBackupIntoSecondBackup(backupsInFtpHost, backups)
+    print_all_backups_infos(backups)
+    backupSerializer.saveBackupToDumpFile(backups, dumpfilepath)
+
+
+def display_dump_file(dumpfilepath):
+    backupsToDisplay = backupSerializer.getBackupsFromDumpFile(dumpfilepath)
+    print_all_backups_infos(backupsToDisplay)
+
+
+# helpers
 
 def mergeBackup(backup1, backup2):
+    '''
+    merges 2 backups
+    '''
     result ={}
     _mergeFirstBackupIntoSecondBackup(backup1, result)
     _mergeFirstBackupIntoSecondBackup(backup2, result)
     return result
 
 def sortAndRemoveOldBackups(backups, maxNumberOfBackupsToKeepForSingleVm):
+    '''
+    sorts given backup keeps only the first maxNumberOfBackupsToKeepForSingleVm backups
+    '''
     for vmName in backups:
         vmBackups = backups[vmName]
         sortedBackup= takeFirstBackups(vmBackups, maxNumberOfBackupsToKeepForSingleVm)
@@ -73,7 +104,6 @@ def syncBackupsToFtp(vmPathBackupFolderTree, backups):
                     ftphost.upload(vmPathBackupFolderTree + '/' + dateBackup.strftime("%Y-%m-%d-%H%M%S") )
 
 
-
 def getBackupsDiff(backUpSource, backUpToDiff):
     '''
     return a diff between the backUpSource and backUpToDiff
@@ -90,7 +120,6 @@ def getBackupsDiff(backUpSource, backUpToDiff):
     return result
 
 
-
 def get_ftpHost_by_vmName(vmName):
     '''
     by a given vmName, return associated ftpHost
@@ -103,7 +132,6 @@ def get_ftpHost_by_vmName(vmName):
     ftphost = ftpHelper.getFtp(hostname=connectionInfo[0], port=connectionInfo[1], user=connectionInfo[2],
         password=connectionInfo[3], remoteFolder=[4])
     return ftphost
-
 
 
 def print_all_backups_infos(backups):

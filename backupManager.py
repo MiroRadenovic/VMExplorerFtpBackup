@@ -3,9 +3,9 @@ from datetime import datetime
 
 def getBackupsFromFolderTree(pathToFolder):
     ''' given a correct path of a folder that contains VMExplorer backups
-        a dictionary containing backup's informations will be returned
-        args: [string] pathToFolder: realtive or absolute path to the folder containing virtual machines backups
-        returns: [dictionary] backup infos '''
+        a dictionary containing backup's information will be returned
+        args: [string] pathToFolder: relative or absolute path to the folder containing virtual machines backups
+        returns: [dictionary] backup info '''
     resultBackups = {}
     vmNamesToBackup = os.listdir(pathToFolder)
     for vm in vmNamesToBackup:
