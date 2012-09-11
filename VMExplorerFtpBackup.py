@@ -11,7 +11,12 @@ logging.basicConfig(level=logging.DEBUG,format='%(message)s')
 
 
 def main(params):
-    startBackup(params.folder, params.dumpfilepath, params.numberOfBackups)
+    if(params.rebuildDumpFile):
+        rebuildDumpFile()
+    if(params.start):
+        startBackup(params.folder, params.dumpfilepath, params.numberOfBackups)
+    if(params.status):
+        showStatus():
 
 
 def startBackup(vmFolderTree, vmDumpFilePath, num):
@@ -23,8 +28,8 @@ def startBackup(vmFolderTree, vmDumpFilePath, num):
 
 def mergeBackup(backup1, backup2):
     result ={}
-    _mergeFirstBackupIntoSecondBackup_(backup1, result)
-    _mergeFirstBackupIntoSecondBackup_(backup2, result)
+    _mergeFirstBackupIntoSecondBackup(backup1, result)
+    _mergeFirstBackupIntoSecondBackup(backup2, result)
     return result
 
 def sortAndRemoveOldBackups(backups, maxNumberOfBackupsToKeepForSingleVm):
@@ -101,7 +106,24 @@ def get_ftpHost_by_vmName(vmName):
 
 
 
-def _mergeFirstBackupIntoSecondBackup_(backupToJoin, destinationBackupToJoin):
+def print_all_backups_infos(backups):
+    for vmName in backups:
+        print("Backups of virtual machine " + vmName)
+        print_backup_info(backups[vmName])
+
+def print_backup_info(backup):
+    for date in backup:
+        print("Taken on: {0}", date.strftime("%d-%m-%Y at %H:%M:%S"))
+        print("|--- " + date.strftime("%Y-%m-%d-%H%M%S"))
+        for file in backup[date]:
+            print("  !-- " + file)
+
+
+#---------------------------
+#     private methods
+#---------------------------
+
+def _mergeFirstBackupIntoSecondBackup(backupToJoin, destinationBackupToJoin):
     '''
     Merges 2 backups into 1
     Args: backupToJoin [dic] the source
@@ -117,9 +139,16 @@ def _mergeFirstBackupIntoSecondBackup_(backupToJoin, destinationBackupToJoin):
 
 if __name__ == "__main__":
     parser = optparse.OptionParser()
+    # todo: how to user confilcs?
+    # starts the backup and options
+    parser.add_option('-s', '--start', help='starts the backup', dest='start', default='Start')
     parser.add_option('-f', '--folder', help='sets the start folder to parse', dest='folder' ,default='.')
     parser.add_option('-d', '--dumpfilepath', help='path to dumpfile', dest='dumpfilepath' ,default='dump.dm')
     parser.add_option('-n', '--numberOfBackups', help='path to dumpfile', dest='numberOfBackups' ,default='3')
+    # rebuild the local database dump file
+    parser.add_option('-r', '--rebuildDumpFile', help='recreates a new database dump file by reading backups stored into defined ftp sites', dest='rebuildDumpFile', default='False')
+    #display info options
+    parser.add_option('-s', '--status', help='displays the status of the backups: info related to the next upload and the current dump file', dest='rebuildDumpFile', default='False')
     (opts, args) = parser.parse_args()
     main(opts)
 

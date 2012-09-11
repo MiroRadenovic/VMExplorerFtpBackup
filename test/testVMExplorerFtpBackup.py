@@ -216,7 +216,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
 
         with patch.object(backupManager, 'getBackupsFromFtpServer')  as mock_method:
             # http://docs.python.org/dev/library/unittest.mock
-            with patch.object(ftpHelper, 'getFtp', return_value =  _get_mock_ftphost_(self)):
+            with patch.object(ftpHelper, 'getFtp', return_value =  _get_mock_ftphost(self)):
                 # this are the backups stored on the ftp server
                 mock_method.return_value = {
                     'Bart' :   {
@@ -243,7 +243,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
 
 
 
-def _get_mock_ftphost_(testCase):
+def _get_mock_ftphost(testCase):
     '''
     returns a mocked ftphost that check if uploads and deletes of backup are invoked on correct backups.
     '''
