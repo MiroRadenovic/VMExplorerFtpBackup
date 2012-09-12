@@ -18,6 +18,17 @@ mockConfig  = {
     }
 
 
+class mockFtp():
+    def __init__(self, testCase, uploadCallbackAssert, deleteCallbackAssert):
+        self.currrentTestCase = testCase
+        self.uploadCallbackAssert = uploadCallbackAssert
+        self.deleteCallbackAssert = deleteCallbackAssert
+    def rmtree(self, path):
+        self.deleteCallbackAssert(self.currrentTestCase, path)
+    def upload(self, path):
+        self.uploadCallbackAssert(self.currrentTestCase, path)
+
+
 class testVMExplorerFtpBackup(unittest.TestCase):
     def testMergeBackups(self):
         '''ensures merge between two backups produces expected result'''
@@ -185,6 +196,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         2) uploads only new backups that are not already present.
         '''
 
+        # arrange the assserts
         def callbackDeleteAssert(testCase,path):
             if not path.endswith('2001-11-11-163000'):
                 testCase.fail('a request to the wrong backup deletions has been invoked: {0}'.format(path) )
@@ -193,16 +205,6 @@ class testVMExplorerFtpBackup(unittest.TestCase):
             if not (path.endswith('2016-11-21-163600') or path.endswith('2006-11-21-163200')):
                 testCase.fail('a request to the wrong backup upload has been invoked: {0}'.format(path) )
             print('upload invoked')
-
-
-        class mockFtp():
-            def __init__(self, testCase, callbackUploadAssert, callbackDeleteAssert):
-                self.currrentTestCase = testCase
-            def rmtree(self, path):
-                callbackDeleteAssert(self.currrentTestCase, path)
-            def upload(self, path):
-                callbackUploadAssert(self.currrentTestCase, path)
-
 
 
         with patch.object(backupManager, 'getBackupsFromFtpServer')  as mock_method:
@@ -230,52 +232,12 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                         dateFromString('21/11/2016 16:36') :  [ 'uploadME.txt']
                     }
                 }
+                #act
                 VMExplorerFtpBackup.syncBackupsToFtp('/', localBackups)
 
     @patch('config.VmToFtp', mockConfig)
     def testRebuild_dump_file_from_backups_on_ftphosts(self):
         pass
 
-
-
-
-
-
-
-
-def _get_mock_ftphost(testCase, callbackUploadAssert, callbackDeleteAssert):
-    '''
-    returns a mocked ftphost that check if uploads and deletes of backup are invoked on correct backups.
-    '''
-    class mockFtp():
-        def __init__(self, testCase):
-            self.currrentTestCase = testCase
-        def rmtree(self, path):
-            '''
-            make sure that only this backups will be uploaded:
-            'Raoul' :  {
-                            #this backup must be uploaded, because it's not already present in the ftp server
-                            dateFromString('21/11/2016 16:36') :  [ 'uploadME.txt']
-                        }
-
-             'Bart' :   {
-                            dateFromString('21/11/2006 16:32') : [  'uploadME2.txt']
-                        },
-
-            '''
-            if not path.endswith('2001-11-11-163000'):
-                self.currrentTestCase.fail('a request to the wrong backup deletions has been invoked: {0}'.format(path) )
-        def upload(self, path):
-            '''
-            make sure that only this backups will be deleted:
-             'Bart' :   {
-                            dateFromString('11/11/2001 16:30') : [ 'deleteME.txt']
-                        }
-            '''
-            if not (path.endswith('2016-11-21-163600') or path.endswith('2006-11-21-163200')):
-                self.currrentTestCase.fail('a request to the wrong backup upload has been invoked: {0}'.format(path) )
-            print('upload invoked')
-
-    return mockFtp(testCase)
 
 
