@@ -5,6 +5,7 @@ import backupManager
 import unittest
 
 from mock import patch
+import backupSerializer
 import ftpHelper
 
 def dateFromString(date):
@@ -12,11 +13,14 @@ def dateFromString(date):
 
 # global mocks
 
-
 mockConfig  = {
     '*' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
     }
 
+mockFtpConnectionsConfig  = {
+    'Bart' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
+    'Ken' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
+    }
 
 class mockFtp():
     def __init__(self, testCase, uploadCallbackAssert, deleteCallbackAssert):
@@ -235,9 +239,37 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                 #act
                 VMExplorerFtpBackup.syncBackupsToFtp('/', localBackups)
 
-    @patch('config.VmToFtp', mockConfig)
+    @patch('config.VmToFtp', mockFtpConnectionsConfig)
     def testRebuild_dump_file_from_backups_on_ftphosts(self):
-        pass
+        remoteBackups = {
+            'Bart' :   {
+                dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+                dateFromString('21/11/2003 16:32') : [  'uploadME2.txt']
+            },
+            'Ken' :  {
+                dateFromString('21/11/2016 16:36') :  [ 'uploadME.txt']
+            }
+        }
+
+        # arrange the assserts
+        def callbackDeleteAssert(testCase,path):
+            pass
+        def callbackUploadAssert(testCase, path):
+            if not (path.endswith('163600') or path.endswith('163200') or path.endswith('163000')):
+                testCase.fail('a request to the wrong backup upload has been invoked: {0}'.format(path) )
+            print('upload invoked')
+
+
+        with patch.object(backupManager, 'getBackupsFromFtpServer', return_value=remoteBackups):
+            with patch.object(backupSerializer, 'saveBackupToDumpFile'):
+#            with patch.dict('config.VmToFtp', return_value=mockFtpConnectionsConfig):
+                with patch.object(ftpHelper, 'getFtp', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
+                    result = VMExplorerFtpBackup.rebuild_dump_file_from_backups_on_ftphosts('dump.dm')
+
+
+
+
+
 
 
 

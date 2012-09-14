@@ -103,7 +103,6 @@ def syncBackupsToFtp(vmPathBackupFolderTree, backups):
                     # format datetime as 2000-08-28-154138
                     ftphost.upload(vmPathBackupFolderTree + '/' + dateBackup.strftime("%Y-%m-%d-%H%M%S") )
 
-
 def getBackupsDiff(backUpSource, backUpToDiff):
     '''
     return a diff between the backUpSource and backUpToDiff
@@ -119,7 +118,6 @@ def getBackupsDiff(backUpSource, backUpToDiff):
         else: result[vmName] = backUpToDiff[vmName]
     return result
 
-
 def get_ftpHost_by_vmName(vmName):
     '''
     by a given vmName, return associated ftpHost
@@ -129,10 +127,8 @@ def get_ftpHost_by_vmName(vmName):
     else:
         connectionInfo = config.VmToFtp['*']
         # connect to ftp server
-    ftphost = ftpHelper.getFtp(hostname=connectionInfo[0], port=connectionInfo[1], user=connectionInfo[2],
-        password=connectionInfo[3], remoteFolder=[4])
+    ftphost = ftpHelper.getFtp(hostname=connectionInfo[0], port=connectionInfo[1], user=connectionInfo[2],password=connectionInfo[3], remoteFolder=[4])
     return ftphost
-
 
 def print_all_backups_infos(backups):
     for vmName in backups:
