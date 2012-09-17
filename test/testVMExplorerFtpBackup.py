@@ -7,20 +7,10 @@ import unittest
 from mock import patch
 import backupSerializer
 import ftpHelper
+import config
 
 def dateFromString(date):
     return datetime.strptime(date, "%d/%m/%Y %H:%M")
-
-# global mocks
-
-mockConfig  = {
-    '*' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
-    }
-
-mockFtpConnectionsConfig  = {
-    'Bart' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
-    'Ken' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
-    }
 
 class mockFtp():
     def __init__(self, testCase, uploadCallbackAssert, deleteCallbackAssert):
@@ -192,7 +182,6 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         self.assertTrue(len(backupToUpload['Raoul']) == 1)
         self.assertTrue(backupToUpload['Raoul'][dateFromString('21/11/2016 16:36')] != None)
 
-    @patch('config.VmToFtp', mockConfig)
     def testSyncBackupsToFtp(self):
         '''
         ensures that when VMExplorerFtpBackup syncs backsup to the remote server:
@@ -211,35 +200,41 @@ class testVMExplorerFtpBackup(unittest.TestCase):
             print('upload invoked')
 
 
-        with patch.object(backupManager, 'getBackupsFromFtpServer')  as mock_method:
-            # http://docs.python.org/dev/library/unittest.mock
-            with patch.object(ftpHelper, 'getFtp', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
-                # this are the backups stored on the ftp server
-                mock_method.return_value = {
-                    'Bart' :   {
-                        # this backup must NOT be deleted, because is also in the local backup
-                        dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
-                        #this backup must be deleted. there are no information related this backup in the localBackups
-                        dateFromString('11/11/2001 16:30') : [ 'deleteME.txt']
-                    }
-                }
-                # this represents the local backups.
-                localBackups = {
-                    'Bart' :   {
-                        # this backup must NOT be uploaded, because it's already in ftp server
-                        dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
-                        #this backup must be uploaded, because it's not already present in the ftp server
-                        dateFromString('21/11/2006 16:32') : [  'uploadME2.txt']
-                    },
-                    'Raoul' :  {
-                        #this backup must be uploaded, because it's not already present in the ftp server
-                        dateFromString('21/11/2016 16:36') :  [ 'uploadME.txt']
-                    }
-                }
-                #act
-                VMExplorerFtpBackup.syncBackupsToFtp('/', localBackups)
+        mockConfig  = {
+            '*' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
+            }
 
-    @patch('config.VmToFtp', mockFtpConnectionsConfig)
+
+        # http://docs.python.org/dev/library/unittest.mock
+        with patch.object(backupManager, 'getBackupsFromFtpServer')  as mock_method:
+            with patch.object(ftpHelper, 'getFtp', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
+                with patch.dict(config.VmToFtp, mockConfig):
+                    # this are the backups stored on the ftp server
+                    mock_method.return_value = {
+                        'Bart' :   {
+                            # this backup must NOT be deleted, because is also in the local backup
+                            dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+                            #this backup must be deleted. there are no information related this backup in the localBackups
+                            dateFromString('11/11/2001 16:30') : [ 'deleteME.txt']
+                        }
+                    }
+                    # this represents the local backups.
+                    localBackups = {
+                        'Bart' :   {
+                            # this backup must NOT be uploaded, because it's already in ftp server
+                            dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+                            #this backup must be uploaded, because it's not already present in the ftp server
+                            dateFromString('21/11/2006 16:32') : [  'uploadME2.txt']
+                        },
+                        'Raoul' :  {
+                            #this backup must be uploaded, because it's not already present in the ftp server
+                            dateFromString('21/11/2016 16:36') :  [ 'uploadME.txt']
+                        }
+                    }
+                    #act
+                    VMExplorerFtpBackup.syncBackupsToFtp('/', localBackups)
+
+#    @patch('config.VmToFtp', mockFtpConnectionsConfig)
     def testRebuild_dump_file_from_backups_on_ftphosts(self):
         remoteBackups = {
             'Bart' :   {
@@ -251,6 +246,12 @@ class testVMExplorerFtpBackup(unittest.TestCase):
             }
         }
 
+
+        mockFtpConnectionsConfig  = {
+            'Bart' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
+            'Ken' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
+            }
+
         # arrange the assserts
         def callbackDeleteAssert(testCase,path):
             pass
@@ -259,12 +260,11 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                 testCase.fail('a request to the wrong backup upload has been invoked: {0}'.format(path) )
             print('upload invoked')
 
-
-        with patch.object(backupManager, 'getBackupsFromFtpServer', return_value=remoteBackups):
-            with patch.object(backupSerializer, 'saveBackupToDumpFile'):
-#            with patch.dict('config.VmToFtp', return_value=mockFtpConnectionsConfig):
-                with patch.object(ftpHelper, 'getFtp', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
-                    result = VMExplorerFtpBackup.rebuild_dump_file_from_backups_on_ftphosts('dump.dm')
+        with patch.dict(config.VmToFtp, mockFtpConnectionsConfig, clear=True):
+            with patch.object(backupManager, 'getBackupsFromFtpServer', return_value=remoteBackups):
+                with patch.object(backupSerializer, 'saveBackupToDumpFile'):
+                    with patch.object(ftpHelper, 'getFtp', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
+                        result = VMExplorerFtpBackup.rebuild_dump_file_from_backups_on_ftphosts('dump.dm')
 
 
 
