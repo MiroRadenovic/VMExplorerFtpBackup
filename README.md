@@ -9,7 +9,7 @@ TESTS
 Deps
 ----
 Only for testing purpose, VMExplorerFtpBackup has some dependency to an external libraries:
-  * [mock] : http://www.voidspace.org.uk/python/mock.You don't need [mock] to run the program.
+  * [mock] : http://www.voidspace.org.uk/python/mock. You don't need [mock] to run the program.
   * [twistd] : http://twistedmatrix.com/trac/
 
 Mock:
