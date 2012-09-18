@@ -39,13 +39,13 @@ def main(params):
 
 def start_backup(vmFolderTree, vmDumpFilePath, num):
     backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTree)
-    logging.debug("folder tree inspection from path {0} has found the following backups that will be uploaded /n {1}", vmFolderTree, print_all_backups_infos(backupsToUpload))
+    logging.debug("folder tree inspection from path {0} has found the following backups that will be uploaded \n {1}".format(vmFolderTree, print_all_backups_infos(backupsToUpload)))
     backupsInDumpFile = backupSerializer.getBackupsFromDumpFile(vmDumpFilePath)
-    logging.debug("current backup status is (from dumpfile {0}) /n: {1}", vmDumpFilePath, print_all_backups_infos(backupsInDumpFile))
+    logging.debug("current backup status is (from dumpfile {0}) \n: {1}".format(vmDumpFilePath, print_all_backups_infos(backupsInDumpFile)))
     backups = get_merge_of_backups(backupsToUpload, backupsInDumpFile)
-    logging.debug("the merging of the 2 backups is: {0}", print_all_backups_infos(backups))
+    logging.debug("the merging of the 2 backups is:\n {0}".format(print_all_backups_infos(backups)))
     sort_and_remove_old_backups(backups, num)
-    logging.debug("cleaned old backups (max {0} backups), the result is {1}", num, print_all_backups_infos(backups))
+    logging.debug("cleaned old backups (max {0} backups), the result is {1}".format(num, print_all_backups_infos(backups)))
     try:
         sync_backups_with_ftp_server(vmFolderTree, backups)
     except Exception:
