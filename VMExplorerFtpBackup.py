@@ -14,14 +14,20 @@ logging.basicConfig(level=logging.DEBUG,format='%(message)s')
 def main(params):
     if(params.rebuildDumpFile):
         # todo: leaqrn how to use input
-        answer = input('This option will delete the current dump file and rebuild a new one. all backup statuses'' will be lost. press [Y] to confirm and continue')
-        if answer == 'y':
-            rebuild_dump_file_from_backups_on_ftphosts()
-        else : print('exiting!')
-    if(params.start):
-        start_backup(params.folder, params.dumpfilepath, params.numberOfBackups)
-    if(params.status):
+        answer = raw_input('This option will delete the current dump file and rebuild a new one. all backup statuses'' will be lost. press [Y] to confirm and continue\n')
+        if answer.lower() == 'y':
+            try:
+                rebuild_dump_file_from_backups_on_ftphosts(params.dumpFilePath)
+            except Exception as ex:
+                logging.error(ex)
+        else :
+            print('ok, leaving... bye bye!')
+    elif(params.start):
+        start_backup(params.folder, params.dumpFilePath, params.numberOfBackups)
+    elif(params.status):
         display_dump_file(params.dumpfilepath)
+
+    return 0
 
 # programs options
 
@@ -41,7 +47,7 @@ def start_backup(vmFolderTree, vmDumpFilePath, num):
     # todo: must save
 
 
-def rebuild_dump_file_from_backups_on_ftphosts(dumpfilepath):
+def rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
     '''
     rebuilds a new dump file by scanning all ftp server's
     '''
@@ -50,9 +56,9 @@ def rebuild_dump_file_from_backups_on_ftphosts(dumpfilepath):
         if not vmName == '*':
             host = get_ftpHost_by_vmName(vmName)
             backupsInFtpHost = backupManager.getBackupsFromFtpServer(host)
-            _mergeFirstBackupIntoSecondBackup(backupsInFtpHost, backups)
+            _merge_first_backup_into_second_backup(backupsInFtpHost, backups)
     print_all_backups_infos(backups)
-    backupSerializer.saveBackupToDumpFile(backups, dumpfilepath)
+    backupSerializer.saveBackupToDumpFile(backups, dumpFilePath)
     return backups
 
 
@@ -71,8 +77,8 @@ def get_merge_of_backups(backup1, backup2):
     merges 2 backups
     '''
     result ={}
-    _mergeFirstBackupIntoSecondBackup(backup1, result)
-    _mergeFirstBackupIntoSecondBackup(backup2, result)
+    _merge_first_backup_into_second_backup(backup1, result)
+    _merge_first_backup_into_second_backup(backup2, result)
     return result
 
 def sort_and_remove_old_backups(backups, maxNumberOfBackupsToKeepForSingleVm):
@@ -172,7 +178,7 @@ def print_backup_info(backup):
 #     private methods
 #---------------------------
 
-def _mergeFirstBackupIntoSecondBackup(backupToJoin, destinationBackupToJoin):
+def _merge_first_backup_into_second_backup(backupToJoin, destinationBackupToJoin):
     '''
     Merges 2 backups into 1
     Args: backupToJoin [dic] the source
@@ -188,16 +194,16 @@ def _mergeFirstBackupIntoSecondBackup(backupToJoin, destinationBackupToJoin):
 
 if __name__ == "__main__":
     parser = optparse.OptionParser()
-    # todo: how to user confilcs?
+    # todo: how to use confilcs?
     # starts the backup and options
-    parser.add_option('-s', '--start', help='starts the backup', dest='start', default='Start')
+    parser.add_option('-s', '--start', help='starts the backup', dest='start', default=True)
     parser.add_option('-f', '--folder', help='sets the start folder to parse', dest='folder' ,default='.')
-    parser.add_option('-d', '--dumpfilepath', help='path to dumpfile', dest='dumpfilepath' ,default='dump.dm')
+    parser.add_option('-d', '--dumpFilePath', help='path to dumpfile', dest='dumpFilePath' ,default='dump.dm')
     parser.add_option('-n', '--numberOfBackups', help='path to dumpfile', dest='numberOfBackups' ,default='3')
     # rebuild the local database dump file
-    parser.add_option('-r', '--rebuildDumpFile', help='recreates a new database dump file by reading backups stored into defined ftp sites', dest='rebuildDumpFile', default='False')
+    parser.add_option('-r', '--rebuildDumpFile', help='recreates a new database dump file by reading backups stored into defined ftp sites', dest='rebuildDumpFile',  action="store_true", default=False)
     #display info options
-    parser.add_option('-z', '--status', help='displays the status of the backups: info related to the next upload and the current dump file', dest='rebuildDumpFile', default='False')
+    parser.add_option('-z', '--status', help='displays the status of the backups: info related to the next upload and the current dump file', dest='status', action="store_true", default=False)
     (opts, args) = parser.parse_args()
     main(opts)
 
