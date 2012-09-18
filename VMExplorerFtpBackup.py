@@ -30,12 +30,12 @@ def start_backup(vmFolderTree, vmDumpFilePath, num):
     logging.debug("folder tree inspection from path {0} has found the following backups that will be uploaded /n {1}", vmFolderTree, print_all_backups_infos(backupsToUpload))
     backupsInDumpFile = backupSerializer.getBackupsFromDumpFile(vmDumpFilePath)
     logging.debug("current backup status is (from dumpfile {0}) /n: {1}", vmDumpFilePath, print_all_backups_infos(backupsInDumpFile))
-    backups = mergeBackup(backupsToUpload, backupsInDumpFile)
+    backups = get_merge_of_backups(backupsToUpload, backupsInDumpFile)
     logging.debug("the merging of the 2 backups is: {0}", print_all_backups_infos(backups))
-    sortAndRemoveOldBackups(backups, num)
+    sort_and_remove_old_backups(backups, num)
     logging.debug("cleaned old backups (max {0} backups), the result is {1}", num, print_all_backups_infos(backups))
     try:
-        syncBackupsToFtp(vmFolderTree, backups)
+        sync_backups_with_ftp_server(vmFolderTree, backups)
     except Exception:
         logging.error("An error occured while syncing the backup")
     # todo: must save
@@ -56,14 +56,17 @@ def rebuild_dump_file_from_backups_on_ftphosts(dumpfilepath):
     return backups
 
 
-def display_dump_file(dumpfilepath):
-    backupsToDisplay = backupSerializer.getBackupsFromDumpFile(dumpfilepath)
-    print_all_backups_infos(backupsToDisplay)
+def display_dump_file(dumpFilePath):
+    '''
+    displays the content of the given dump file
+    '''
+    backupsToDisplay = backupSerializer.getBackupsFromDumpFile(dumpFilePath)
+    print(print_all_backups_infos(backupsToDisplay))
 
 
 # helpers
 
-def mergeBackup(backup1, backup2):
+def get_merge_of_backups(backup1, backup2):
     '''
     merges 2 backups
     '''
@@ -72,18 +75,18 @@ def mergeBackup(backup1, backup2):
     _mergeFirstBackupIntoSecondBackup(backup2, result)
     return result
 
-def sortAndRemoveOldBackups(backups, maxNumberOfBackupsToKeepForSingleVm):
+def sort_and_remove_old_backups(backups, maxNumberOfBackupsToKeepForSingleVm):
     '''
     sorts given backup keeps only the first maxNumberOfBackupsToKeepForSingleVm backups
     '''
     for vmName in backups:
         vmBackups = backups[vmName]
-        sortedBackup= takeFirstBackups(vmBackups, maxNumberOfBackupsToKeepForSingleVm)
+        sortedBackup= get_only_new_backups(vmBackups, maxNumberOfBackupsToKeepForSingleVm)
         backups[vmName] = sortedBackup
 
-def takeFirstBackups(dic, numberOfBackupsToTake):
+def get_only_new_backups(dic, numberOfBackupsToTake):
     '''
-    takes
+    returns only the backups between range [0:numberOfBackupsToTake]
     '''
     currentIndex = 0
     result = {}
@@ -96,16 +99,16 @@ def takeFirstBackups(dic, numberOfBackupsToTake):
         else: return result
     return result
 
-def syncBackupsToFtp(vmPathBackupFolderTree, backups):
+def sync_backups_with_ftp_server(vmPathBackupFolderTree, backups):
     logging.info("syncing to ftp has started")
     for vmName in backups:
         ftphost = get_ftpHost_by_vmName(vmName)
         logging.debug("backup of virtual machine {0}  will be now uploaded to {1} ftp server".format(vmName, ftphost.hostname))
         backupsOnServer = backupManager.getBackupsFromFtpServer(ftphost)
         logging.debug("ftp server {0} has already the following backups:\n {1}".format(ftphost.hostname, print_all_backups_infos(backupsOnServer)))
-        backupsToDelete = getBackupsDiff(backups, backupsOnServer)
+        backupsToDelete = get_backups_diff(backups, backupsOnServer)
         logging.debug("the following files will be deleted: \n {0}".format(print_all_backups_infos(backupsToDelete)))
-        backupsToUpload = getBackupsDiff(backupsOnServer, backups)
+        backupsToUpload = get_backups_diff(backupsOnServer, backups)
         logging.debug("the following files will be uploaded to the ftp server:{0}\n".format(print_all_backups_infos(backupsToDelete)))
 
         # first delete the backups that are on the remote ftp server that are not present in the backups dic
@@ -121,7 +124,7 @@ def syncBackupsToFtp(vmPathBackupFolderTree, backups):
                     ftphost.upload(vmPathBackupFolderTree + '/' + dateBackup.strftime("%Y-%m-%d-%H%M%S") )
     logging.info("syncing to ftp has finished successfully")
 
-def getBackupsDiff(backUpSource, backUpToDiff):
+def get_backups_diff(backUpSource, backUpToDiff):
     '''
     return a diff between the backUpSource and backUpToDiff
     '''
