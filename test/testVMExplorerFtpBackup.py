@@ -17,6 +17,7 @@ class mockFtp():
         self.currrentTestCase = testCase
         self.uploadCallbackAssert = uploadCallbackAssert
         self.deleteCallbackAssert = deleteCallbackAssert
+        self.hostname = "localhost(mock)"
     def rmtree(self, path):
         self.deleteCallbackAssert(self.currrentTestCase, path)
     def upload(self, path):
@@ -265,6 +266,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                 with patch.object(backupSerializer, 'saveBackupToDumpFile'):
                     with patch.object(ftpHelper, 'getFtp', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
                         result = VMExplorerFtpBackup.rebuild_dump_file_from_backups_on_ftphosts('dump.dm')
+                        self.assertEqual(result, remoteBackups)
 
 
 

@@ -13,7 +13,11 @@ logging.basicConfig(level=logging.DEBUG,format='%(message)s')
 
 def main(params):
     if(params.rebuildDumpFile):
-        rebuild_dump_file_from_backups_on_ftphosts()
+        # todo: leaqrn how to use input
+        answer = input('This option will delete the current dump file and rebuild a new one. all backup statuses'' will be lost. press [Y] to confirm and continue')
+        if answer == 'y':
+            rebuild_dump_file_from_backups_on_ftphosts()
+        else : print('exiting!')
     if(params.start):
         start_backup(params.folder, params.dumpfilepath, params.numberOfBackups)
     if(params.status):
@@ -23,10 +27,17 @@ def main(params):
 
 def start_backup(vmFolderTree, vmDumpFilePath, num):
     backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTree)
+    logging.debug("folder tree inspection from path {0} has found the following backups that will be uploaded /n {1}", vmFolderTree, print_all_backups_infos(backupsToUpload))
     backupsInDumpFile = backupSerializer.getBackupsFromDumpFile(vmDumpFilePath)
+    logging.debug("current backup status is (from dumpfile {0}) /n: {1}", vmDumpFilePath, print_all_backups_infos(backupsInDumpFile))
     backups = mergeBackup(backupsToUpload, backupsInDumpFile)
+    logging.debug("the merging of the 2 backups is: {0}", print_all_backups_infos(backups))
     sortAndRemoveOldBackups(backups, num)
-    syncBackupsToFtp(vmFolderTree, backups)
+    logging.debug("cleaned old backups (max {0} backups), the result is {1}", num, print_all_backups_infos(backups))
+    try:
+        syncBackupsToFtp(vmFolderTree, backups)
+    except Exception:
+        logging.error("An error occured while syncing the backup")
     # todo: must save
 
 
@@ -42,6 +53,7 @@ def rebuild_dump_file_from_backups_on_ftphosts(dumpfilepath):
             _mergeFirstBackupIntoSecondBackup(backupsInFtpHost, backups)
     print_all_backups_infos(backups)
     backupSerializer.saveBackupToDumpFile(backups, dumpfilepath)
+    return backups
 
 
 def display_dump_file(dumpfilepath):
@@ -85,11 +97,16 @@ def takeFirstBackups(dic, numberOfBackupsToTake):
     return result
 
 def syncBackupsToFtp(vmPathBackupFolderTree, backups):
+    logging.info("syncing to ftp has started")
     for vmName in backups:
         ftphost = get_ftpHost_by_vmName(vmName)
+        logging.debug("backup of virtual machine {0}  will be now uploaded to {1} ftp server".format(vmName, ftphost.hostname))
         backupsOnServer = backupManager.getBackupsFromFtpServer(ftphost)
+        logging.debug("ftp server {0} has already the following backups:\n {1}".format(ftphost.hostname, print_all_backups_infos(backupsOnServer)))
         backupsToDelete = getBackupsDiff(backups, backupsOnServer)
+        logging.debug("the following files will be deleted: \n {0}".format(print_all_backups_infos(backupsToDelete)))
         backupsToUpload = getBackupsDiff(backupsOnServer, backups)
+        logging.debug("the following files will be uploaded to the ftp server:{0}\n".format(print_all_backups_infos(backupsToDelete)))
 
         # first delete the backups that are on the remote ftp server that are not present in the backups dic
         for bkToDelete in backupsToDelete:
@@ -102,6 +119,7 @@ def syncBackupsToFtp(vmPathBackupFolderTree, backups):
                 for dateBackup in backupsToUpload[candidateUploadVmName]:
                     # format datetime as 2000-08-28-154138
                     ftphost.upload(vmPathBackupFolderTree + '/' + dateBackup.strftime("%Y-%m-%d-%H%M%S") )
+    logging.info("syncing to ftp has finished successfully")
 
 def getBackupsDiff(backUpSource, backUpToDiff):
     '''
@@ -131,16 +149,20 @@ def get_ftpHost_by_vmName(vmName):
     return ftphost
 
 def print_all_backups_infos(backups):
+    result = ""
     for vmName in backups:
-        print("Backups of virtual machine " + vmName)
-        print_backup_info(backups[vmName])
+        result += "Backups of virtual machine " + vmName + "\n"
+        result += print_backup_info(backups[vmName])
+    return result
 
 def print_backup_info(backup):
+    result = ""
     for date in backup:
-        print("Taken on: {0}", date.strftime("%d-%m-%Y at %H:%M:%S"))
-        print("|--- " + date.strftime("%Y-%m-%d-%H%M%S"))
+        result += "- Taken on: {0} ".format(date.strftime("%d-%m-%Y at %H:%M:%S")) + ". this backup contains: \n"
+        result += "|--- " + date.strftime("%Y-%m-%d-%H%M%S") + "\n"
         for file in backup[date]:
-            print("  !-- " + file)
+            result += "     |-- " + file + "\n"
+    return result
 
 
 #---------------------------
@@ -172,7 +194,7 @@ if __name__ == "__main__":
     # rebuild the local database dump file
     parser.add_option('-r', '--rebuildDumpFile', help='recreates a new database dump file by reading backups stored into defined ftp sites', dest='rebuildDumpFile', default='False')
     #display info options
-    parser.add_option('-s', '--status', help='displays the status of the backups: info related to the next upload and the current dump file', dest='rebuildDumpFile', default='False')
+    parser.add_option('-z', '--status', help='displays the status of the backups: info related to the next upload and the current dump file', dest='rebuildDumpFile', default='False')
     (opts, args) = parser.parse_args()
     main(opts)
 

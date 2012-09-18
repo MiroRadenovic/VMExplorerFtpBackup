@@ -11,6 +11,7 @@ class FtpSession(ftplib.FTP):
 
 def getFtp(hostname, user='anonymous', password='anonymous', port=21, remoteFolder=None):
     result =  ftputil.FTPHost(hostname, user, password, port=port, session_factory=FtpSession)
+    result.hostname = hostname
     if remoteFolder != None:
         result.chdir(remoteFolder)
     return result
