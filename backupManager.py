@@ -1,11 +1,13 @@
 import os
 from datetime import datetime
+import customExceptions
 
 def getBackupsFromFolderTree(pathToFolder):
     ''' given a correct path of a folder that contains VMExplorer backups
         a dictionary containing backup's information will be returned
         args: [string] pathToFolder: relative or absolute path to the folder containing virtual machines backups
         returns: [dictionary] backup info '''
+
     resultBackups = {}
     vmNamesToBackup = os.listdir(pathToFolder)
     for vm in vmNamesToBackup:
@@ -35,15 +37,14 @@ def _getFilesFromFolder_(pathToBackUpFiles):
 
 def _getBackupsFromVirtualMachineFolder_(pathToVmFolder):
     result = {}
-    for date in os.listdir(pathToVmFolder):
-        try:
+    try:
+        for date in os.listdir(pathToVmFolder):
             dateTime = datetime.strptime(date, '%Y-%m-%d-%H%M%S')
             pathToBackUpFiles = os.path.join(pathToVmFolder, date)
             filesToBackUp = _getFilesFromFolder_(pathToBackUpFiles)
-        except Exception as ex:
-            print("Cannot follow expected folder tree in {0}. error is {1} ".format(pathToVmFolder, ex))
-            raise ex
-        result[dateTime] = filesToBackUp
+            result[dateTime] = filesToBackUp
+    except Exception as ex:
+        raise customExceptions.UnexpectedFolderTreeException(pathToVmFolder, ex)
     return result
 
 

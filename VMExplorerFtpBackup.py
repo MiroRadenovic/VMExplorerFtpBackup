@@ -9,31 +9,29 @@ import ftpHelper
 
 # program start
 
-
-
-
 def main(params):
 
     _configure_logger(params.verbosity)
-    logging.error("Error")
-    logging.warn("warn")
-    logging.info("info")
-    logging.debug("debug")
 
-    if(params.rebuildDumpFile):
-        # todo: leaqrn how to use input
-        answer = raw_input('This option will delete the current dump file and rebuild a new one. all backup statuses'' will be lost. press [Y] to confirm and continue\n')
-        if answer.lower() == 'y':
-            try:
-                rebuild_dump_file_from_backups_on_ftphosts(params.dumpFilePath)
-            except Exception as ex:
-                logging.error(ex)
-        else :
-            print('ok, leaving... bye bye!')
-    elif(params.start):
-        start_backup(params.folder, params.dumpFilePath, params.numberOfBackups)
-    elif(params.status):
-        display_dump_file(params.dumpfilepath)
+    try:
+        if(params.rebuildDumpFile):
+            # todo: leaqrn how to use input
+            answer = raw_input('This option will delete the current dump file and rebuild a new one. all backup statuses'' will be lost. press [Y] to confirm and continue\n')
+            if answer.lower() == 'y':
+                try:
+                    rebuild_dump_file_from_backups_on_ftphosts(params.dumpFilePath)
+                except Exception as ex:
+                    logging.error(ex)
+            else :
+                print('ok, leaving... bye bye!')
+        elif(params.start):
+            start_backup(params.folder, params.dumpFilePath, params.numberOfBackups)
+
+        elif(params.status):
+            display_dump_file(params.dumpfilepath)
+    except Exception as ex:
+        logging.error(ex)
+        return 1
 
     return 0
 
@@ -203,13 +201,17 @@ def _configure_logger(verbosity):
     '''
     configures the logger
     '''
-    verbosityLeveles =  {
+    verbosityLevels =  {
         'info': logging.INFO,
         'warn': logging.WARNING,
         'error': logging.ERROR,
         'debug': logging.DEBUG,
         }
-    logging.basicConfig(level=verbosityLeveles[verbosity], format='%(message)s')
+    try:
+        logging.basicConfig(level=verbosityLevels[verbosity], format='%(message)s')
+    except KeyError:
+        print("an unknown verbosity option has been selected: {0}. the debug option will be selected automatically".format(verbosity))
+        logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 
 
@@ -217,7 +219,7 @@ if __name__ == "__main__":
     parser = optparse.OptionParser()
     # todo: how to use confilcs?
     # starts the backup and options
-    parser.add_option('-s', '--start', help='starts the backup', dest='start', default=True)
+    parser.add_option('-s', '--start', help='starts the backup', dest='start', action="store_true", default=True)
     parser.add_option('-f', '--folder', help='sets the start folder to parse', dest='folder' ,default='.')
     parser.add_option('-d', '--dumpFilePath', help='path to dumpfile', dest='dumpFilePath' ,default='dump.dm')
     parser.add_option('-n', '--numberOfBackups', help='path to dumpfile', dest='numberOfBackups' ,default='3')
@@ -225,7 +227,7 @@ if __name__ == "__main__":
     parser.add_option('-r', '--rebuildDumpFile', help='recreates a new database dump file by reading backups stored into defined ftp sites', dest='rebuildDumpFile',  action="store_true", default=False)
     #display info options
     parser.add_option('-z', '--status', help='displays the status of the backups: info related to the next upload and the current dump file', dest='status', action="store_true", default=False)
-    parser.add_option('-v', '--verbose', help='set the verbosity level. accepted values are: info, warn, error', dest='verbosity', default='error')
+    parser.add_option('-v', '--verbose', help='set the verbosity level. accepted values are: info, warn, error and debug', dest='verbosity', default='info')
     (opts, args) = parser.parse_args()
     main(opts)
 
