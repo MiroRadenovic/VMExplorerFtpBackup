@@ -7,11 +7,19 @@ import config
 import ftpHelper
 
 
-logging.basicConfig(level=logging.DEBUG,format='%(message)s')
-
 # program start
 
+
+
+
 def main(params):
+
+    _configure_logger(params.verbosity)
+    logging.error("Error")
+    logging.warn("warn")
+    logging.info("info")
+    logging.debug("debug")
+
     if(params.rebuildDumpFile):
         # todo: leaqrn how to use input
         answer = raw_input('This option will delete the current dump file and rebuild a new one. all backup statuses'' will be lost. press [Y] to confirm and continue\n')
@@ -191,6 +199,19 @@ def _merge_first_backup_into_second_backup(backupToJoin, destinationBackupToJoin
                 machine[dateOfBackup] = backupToJoin[vm][dateOfBackup]
         else : destinationBackupToJoin[vm] = backupToJoin[vm]
 
+def _configure_logger(verbosity):
+    '''
+    configures the logger
+    '''
+    verbosityLeveles =  {
+        'info': logging.INFO,
+        'warn': logging.WARNING,
+        'error': logging.ERROR,
+        'debug': logging.DEBUG,
+        }
+    logging.basicConfig(level=verbosityLeveles[verbosity], format='%(message)s')
+
+
 
 if __name__ == "__main__":
     parser = optparse.OptionParser()
@@ -204,6 +225,7 @@ if __name__ == "__main__":
     parser.add_option('-r', '--rebuildDumpFile', help='recreates a new database dump file by reading backups stored into defined ftp sites', dest='rebuildDumpFile',  action="store_true", default=False)
     #display info options
     parser.add_option('-z', '--status', help='displays the status of the backups: info related to the next upload and the current dump file', dest='status', action="store_true", default=False)
+    parser.add_option('-v', '--verbose', help='set the verbosity level. accepted values are: info, warn, error', dest='verbosity', default='error')
     (opts, args) = parser.parse_args()
     main(opts)
 
