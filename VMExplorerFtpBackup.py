@@ -25,8 +25,16 @@ import logging
 
 import backupManager
 import backupSerializer
-import config
 import ftpHelper
+
+config = None
+
+def _import_ftp_config(configToImport):
+    try:
+        global config
+        config = __import__(configToImport, globals(), locals(), [], -1)
+    except ImportError:
+        logging.error("Cannot import configuration {0}. ".format(configToImport))
 
 
 # program start
@@ -34,6 +42,8 @@ import ftpHelper
 def main(params):
 
     _configure_logger(params.verbosity)
+    _import_ftp_config(params.configFtp)
+
 
     try:
         if(params.rebuildDumpFile):
@@ -245,11 +255,13 @@ if __name__ == "__main__":
     parser.add_option('-f', '--folder', help='sets the start folder to parse', dest='folder' ,default='.')
     parser.add_option('-d', '--dumpFilePath', help='path to dumpfile', dest='dumpFilePath' ,default='dump.dm')
     parser.add_option('-n', '--numberOfBackups', help='path to dumpfile', dest='numberOfBackups' ,default='3')
+    parser.add_option('-c', '--configFtp', help='set the alternative config file that stores ftp connections', dest='configFtp', default='config')
     # rebuild the local database dump file
     parser.add_option('-r', '--rebuildDumpFile', help='recreates a new database dump file by reading backups stored into defined ftp sites', dest='rebuildDumpFile',  action="store_true", default=False)
     #display info options
     parser.add_option('-z', '--status', help='displays the status of the backups: info related to the next upload and the current dump file', dest='status', action="store_true", default=False)
     parser.add_option('-v', '--verbose', help='set the verbosity level. accepted values are: info, warn, error and debug', dest='verbosity', default='info')
+
     (opts, args) = parser.parse_args()
     main(opts)
 
