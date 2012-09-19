@@ -29,14 +29,6 @@ import ftpHelper
 
 config = None
 
-def _import_ftp_config(configToImport):
-    try:
-        global config
-        config = __import__(configToImport, globals(), locals(), [], -1)
-    except ImportError:
-        logging.error("Cannot import configuration {0}. ".format(configToImport))
-
-
 # program start
 
 def main(params):
@@ -80,8 +72,10 @@ def start_backup(vmFolderTree, vmDumpFilePath, num):
     logging.debug("cleaned old backups (max {0} backups), the result is {1}".format(num, print_all_backups_infos(backups)))
     try:
         sync_backups_with_ftp_server(vmFolderTree, backups)
-    except Exception:
-        logging.error("An error occured while syncing the backup")
+    except Exception as ex:
+        logging.error("An error occured while syncing the backup: {0}".format(ex))
+        raise ex
+
     # todo: must save
 
 
@@ -155,17 +149,22 @@ def sync_backups_with_ftp_server(vmPathBackupFolderTree, backups):
         backupsToUpload = get_backups_diff(backupsOnServer, backups)
         logging.debug("the following files will be uploaded to the ftp server:{0}\n".format(print_all_backups_infos(backupsToDelete)))
 
+        # todo: uncomment
         # first delete the backups that are on the remote ftp server that are not present in the backups dic
-        for bkToDelete in backupsToDelete:
-            for dateBackup in backupsToDelete[bkToDelete]:
-                ftphost.rmtree(vmPathBackupFolderTree + '/' +  dateBackup.strftime("%Y-%m-%d-%H%M%S"))
+        #for bkToDelete in backupsToDelete:
+            #for dateBackup in backupsToDelete[bkToDelete]:
+                #ftphost.rmtree(vmPathBackupFolderTree + '/' +  dateBackup.strftime("%Y-%m-%d-%H%M%S"))
 
         #then upload the backups that are not present in the remote ftp
         for candidateUploadVmName in backupsToUpload:
             if candidateUploadVmName == vmName:
                 for dateBackup in backupsToUpload[candidateUploadVmName]:
                     # format datetime as 2000-08-28-154138
-                    ftphost.upload(vmPathBackupFolderTree + '/' + dateBackup.strftime("%Y-%m-%d-%H%M%S") )
+                    dateFolder =  dateBackup.strftime("%Y-%m-%d-%H%M%S")
+                    #ftphost.upload(vmPathBackupFolderTree + '/' + candidateUploadVmName + '/' +dateFolder, ftphost.remoteVmFolder + '/' + candidateUploadVmName + '/'  + dateFolder )
+                    ftphost.mkdir(ftphost.remoteVmFolder + '/' + candidateUploadVmName)
+                    ftphost.mkdir(ftphost.remoteVmFolder + '/' + candidateUploadVmName + '/'  + dateFolder)
+                    ftphost.syncFolders(vmPathBackupFolderTree + '/' + candidateUploadVmName + '/' +dateFolder, ftphost.remoteVmFolder + '/' + candidateUploadVmName + '/'  + dateFolder )
     logging.info("syncing to ftp has finished successfully")
 
 def get_backups_diff(backUpSource, backUpToDiff):
@@ -192,7 +191,7 @@ def get_ftpHost_by_vmName(vmName):
     else:
         connectionInfo = config.VmToFtp['*']
         # connect to ftp server
-    ftphost = ftpHelper.getFtp(hostname=connectionInfo[0], port=connectionInfo[1], user=connectionInfo[2],password=connectionInfo[3], remoteFolder=[4])
+    ftphost = ftpHelper.getFtp(hostname=connectionInfo[0], port=connectionInfo[1], user=connectionInfo[2],password=connectionInfo[3], remoteFolder=connectionInfo[4])
     return ftphost
 
 def print_all_backups_infos(backups):
@@ -245,6 +244,12 @@ def _configure_logger(verbosity):
         print("an unknown verbosity option has been selected: {0}. the debug option will be selected automatically".format(verbosity))
         logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
+def _import_ftp_config(configToImport):
+    try:
+        global config
+        config = __import__(configToImport, globals(), locals(), [], -1)
+    except ImportError:
+        logging.error("Cannot import configuration {0}. ".format(configToImport))
 
 
 if __name__ == "__main__":

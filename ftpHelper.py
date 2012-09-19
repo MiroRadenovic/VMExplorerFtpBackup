@@ -20,9 +20,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-
+import types
 import ftplib
 import ftputil
+from ftputil import ftp_sync
 
 class FtpSession(ftplib.FTP):
     def __init__(self, host, userid, password, port):
@@ -35,6 +36,19 @@ class FtpSession(ftplib.FTP):
 def getFtp(hostname, user='anonymous', password='anonymous', port=21, remoteFolder=None):
     result =  ftputil.FTPHost(hostname, user, password, port=port, session_factory=FtpSession)
     result.hostname = hostname
+
     if remoteFolder != None:
+        result.remoteVmFolder = remoteFolder
         result.chdir(remoteFolder)
+    else:
+        result.remoteVmFolder = '/'
+
+    # http://countergram.com/adding-bound-methods
+    result.syncFolders =  types.MethodType(sync, result, result.__class__)
     return result
+
+def sync(self, source_directory, target_directory):
+    source = ftp_sync.LocalHost()
+    syncer = ftp_sync.Syncer(source, self)
+    syncer.sync(source_directory, target_directory)
+

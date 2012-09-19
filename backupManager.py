@@ -39,6 +39,12 @@ def getBackupsFromFolderTree(pathToFolder):
     return resultBackups
 
 def getBackupsFromFtpServer(host):
+    ftplist = None
+    try:
+        ftplist = host.listdir('.')
+    except Exception:
+        ftplist = host.listdir('.')
+
     result = {}
     names = host.listdir(host.curdir)
     for serverName in names:
