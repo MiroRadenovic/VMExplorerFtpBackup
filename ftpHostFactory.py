@@ -33,7 +33,7 @@ class FtpSession(ftplib.FTP):
         self.login(userid, password)
 
 
-def getFtp(hostname, user='anonymous', password='anonymous', port=21, remoteFolder=None):
+def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, remoteFolder=None):
     result =  ftputil.FTPHost(hostname, user, password, port=port, session_factory=FtpSession)
     result.hostname = hostname
 
@@ -48,7 +48,22 @@ def getFtp(hostname, user='anonymous', password='anonymous', port=21, remoteFold
     return result
 
 def sync(self, source_directory, target_directory):
+
+    def ensure_remote_folder_exist(ftpHost, remoteFolder):
+        currentFolder = ''
+        for folder in remoteFolder.split('/'):
+            try:
+                currentFolder += (folder + '/')
+                ftpHost.listdir(currentFolder)
+            except Exception as ex:
+                ftpHost.mkdir(currentFolder[:-1])
+
+    ensure_remote_folder_exist(self, target_directory)
     source = ftp_sync.LocalHost()
     syncer = ftp_sync.Syncer(source, self)
     syncer.sync(source_directory, target_directory)
+
+
+
+
 

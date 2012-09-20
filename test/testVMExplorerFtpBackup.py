@@ -6,7 +6,7 @@ import unittest
 
 from mock import patch
 import backupSerializer
-import ftpHelper
+import ftpHostFactory
 import config
 
 def dateFromString(date):
@@ -208,7 +208,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
 
         # http://docs.python.org/dev/library/unittest.mock
         with patch.object(backupManager, 'getBackupsFromFtpServer')  as mock_method:
-            with patch.object(ftpHelper, 'getFtp', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
+            with patch.object(ftpHostFactory, 'getFtp', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
                 with patch.dict(config.VmToFtp, mockConfig):
                     # this are the backups stored on the ftp server
                     mock_method.return_value = {
@@ -264,7 +264,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         with patch.dict(config.VmToFtp, mockFtpConnectionsConfig, clear=True):
             with patch.object(backupManager, 'getBackupsFromFtpServer', return_value=remoteBackups):
                 with patch.object(backupSerializer, 'saveBackupToDumpFile'):
-                    with patch.object(ftpHelper, 'getFtp', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
+                    with patch.object(ftpHostFactory, 'getFtp', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
                         result = VMExplorerFtpBackup.rebuild_dump_file_from_backups_on_ftphosts('dump.dm')
                         self.assertEqual(result, remoteBackups)
 

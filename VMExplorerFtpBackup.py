@@ -25,7 +25,7 @@ import logging
 
 import backupManager
 import backupSerializer
-import ftpHelper
+import ftpHostFactory
 
 config = None
 
@@ -161,9 +161,6 @@ def sync_backups_with_ftp_server(vmPathBackupFolderTree, backups):
                 for dateBackup in backupsToUpload[candidateUploadVmName]:
                     # format datetime as 2000-08-28-154138
                     dateFolder =  dateBackup.strftime("%Y-%m-%d-%H%M%S")
-                    #ftphost.upload(vmPathBackupFolderTree + '/' + candidateUploadVmName + '/' +dateFolder, ftphost.remoteVmFolder + '/' + candidateUploadVmName + '/'  + dateFolder )
-                    ftphost.mkdir(ftphost.remoteVmFolder + '/' + candidateUploadVmName)
-                    ftphost.mkdir(ftphost.remoteVmFolder + '/' + candidateUploadVmName + '/'  + dateFolder)
                     ftphost.syncFolders(vmPathBackupFolderTree + '/' + candidateUploadVmName + '/' +dateFolder, ftphost.remoteVmFolder + '/' + candidateUploadVmName + '/'  + dateFolder )
     logging.info("syncing to ftp has finished successfully")
 
@@ -191,7 +188,7 @@ def get_ftpHost_by_vmName(vmName):
     else:
         connectionInfo = config.VmToFtp['*']
         # connect to ftp server
-    ftphost = ftpHelper.getFtp(hostname=connectionInfo[0], port=connectionInfo[1], user=connectionInfo[2],password=connectionInfo[3], remoteFolder=connectionInfo[4])
+    ftphost = ftpHostFactory.create_ftpHost(hostname=connectionInfo[0], port=connectionInfo[1], user=connectionInfo[2],password=connectionInfo[3], remoteFolder=connectionInfo[4])
     return ftphost
 
 def print_all_backups_infos(backups):
