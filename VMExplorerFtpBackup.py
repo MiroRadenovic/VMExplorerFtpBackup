@@ -151,9 +151,9 @@ def sync_backups_with_ftp_server(vmPathBackupFolderTree, backups):
 
         # todo: uncomment
         # first delete the backups that are on the remote ftp server that are not present in the backups dic
-        #for bkToDelete in backupsToDelete:
-            #for dateBackup in backupsToDelete[bkToDelete]:
-                #ftphost.rmtree(vmPathBackupFolderTree + '/' +  dateBackup.strftime("%Y-%m-%d-%H%M%S"))
+        for bkToDelete in backupsToDelete:
+            for dateBackup in backupsToDelete[bkToDelete]:
+                ftphost.rmtree(vmPathBackupFolderTree + '/' +  dateBackup.strftime("%Y-%m-%d-%H%M%S"))
 
         #then upload the backups that are not present in the remote ftp
         for candidateUploadVmName in backupsToUpload:
@@ -247,6 +247,9 @@ def _import_ftp_config(configToImport):
         config = __import__(configToImport, globals(), locals(), [], -1)
     except ImportError:
         logging.error("Cannot import configuration {0}. ".format(configToImport))
+
+def _print_progress_bar(chunk):
+    print chunk
 
 
 if __name__ == "__main__":

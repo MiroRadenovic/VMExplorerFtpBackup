@@ -50,13 +50,10 @@ def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, re
 def sync(self, source_directory, target_directory):
 
     def ensure_remote_folder_exist(ftpHost, remoteFolder):
-        currentFolder = ''
-        for folder in remoteFolder.split('/'):
-            try:
-                currentFolder += (folder + '/')
-                ftpHost.listdir(currentFolder)
-            except Exception as ex:
-                ftpHost.mkdir(currentFolder[:-1])
+        try:
+            ftpHost.listdir(currentFolder)
+        except Exception:
+            ftpHost.makedirs(remoteFolder)
 
     ensure_remote_folder_exist(self, target_directory)
     source = ftp_sync.LocalHost()
