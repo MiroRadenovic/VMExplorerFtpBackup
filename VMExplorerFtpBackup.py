@@ -43,7 +43,9 @@ def main(params):
             answer = raw_input('This option will delete the current dump file and rebuild a new one. all backup statuses'' will be lost. press [Y] to confirm and continue\n')
             if answer.lower() == 'y':
                 try:
+                    logging.info('user selected option [Y] = delete old dump file and rebuild new one')
                     rebuild_dump_file_from_backups_on_ftphosts(params.dumpFilePath)
+                    logging.info('a new backup dump file has been created with the following backup info: \n{0}'.format(display_dump_file(params.dumpFilePath)))
                 except Exception as ex:
                     logging.error(ex)
             else :
@@ -153,15 +155,15 @@ def sync_backups_with_ftp_server(vmPathBackupFolderTree, backups):
         # first delete the backups that are on the remote ftp server that are not present in the backups dic
         for bkToDelete in backupsToDelete:
             for dateBackup in backupsToDelete[bkToDelete]:
-                ftphost.rmtree(vmPathBackupFolderTree + '/' +  dateBackup.strftime("%Y-%m-%d-%H%M%S"))
+                ftphost.rmtree("{0}/{1}/{2}".format(vmPathBackupFolderTree , bkToDelete , dateBackup.strftime("%Y-%m-%d-%H%M%S")))
 
         #then upload the backups that are not present in the remote ftp
-        for candidateUploadVmName in backupsToUpload:
-            if candidateUploadVmName == vmName:
-                for dateBackup in backupsToUpload[candidateUploadVmName]:
+        for bkToUpload in backupsToUpload:
+            if bkToUpload == vmName:
+                for dateBackup in backupsToUpload[bkToUpload]:
                     # format datetime as 2000-08-28-154138
                     dateFolder =  dateBackup.strftime("%Y-%m-%d-%H%M%S")
-                    ftphost.syncFolders(vmPathBackupFolderTree + '/' + candidateUploadVmName + '/' +dateFolder, ftphost.remoteVmFolder + '/' + candidateUploadVmName + '/'  + dateFolder )
+                    ftphost.syncFolders("{0}/{1}/{2}".format(vmPathBackupFolderTree , bkToUpload ,dateFolder), "{0}/{1}/{2}".format(ftphost.remoteVmFolder, bkToUpload , dateFolder ))
     logging.info("syncing to ftp has finished successfully")
 
 def get_backups_diff(backUpSource, backUpToDiff):
