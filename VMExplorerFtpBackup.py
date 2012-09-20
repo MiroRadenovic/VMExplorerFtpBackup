@@ -222,9 +222,10 @@ def _merge_first_backup_into_second_backup(backupToJoin, destinationBackupToJoin
     '''
     for vm in backupToJoin:
         if vm in destinationBackupToJoin:
-            machine = destinationBackupToJoin[vm]
+            currentDestinationMachine = destinationBackupToJoin[vm]
             for dateOfBackup in backupToJoin[vm]:
-                machine[dateOfBackup] = backupToJoin[vm][dateOfBackup]
+                if not currentDestinationMachine.has_key(dateOfBackup):
+                    currentDestinationMachine[dateOfBackup] = backupToJoin[vm][dateOfBackup]
         else : destinationBackupToJoin[vm] = backupToJoin[vm]
 
 def _configure_logger(verbosity):
