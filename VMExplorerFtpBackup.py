@@ -129,21 +129,14 @@ def get_only_new_backups(dic, numberOfBackupsToTake):
     '''
     returns only the backups between range [0:numberOfBackupsToTake]
     '''
-    maxBackups = int(numberOfBackupsToTake)
-    currentIndex = 0
     result = {}
     keys = dic.keys()
     keys.sort()
+    keys.reverse()
+    keys = keys[0:int(numberOfBackupsToTake)]
     for key in keys:
-        if currentIndex < maxBackups:
-            result[key] = dic[key]
-            currentIndex +=1
-        else: return result
+        result[key] = dic[key]
     return result
-
-
-
-
 
 def upload_backups_with_ftp_server(vmPathBackupFolderTree, backups):
     logging.info("uploading to ftp has started")
