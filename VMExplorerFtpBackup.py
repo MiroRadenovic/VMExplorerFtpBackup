@@ -71,7 +71,7 @@ def start_backup(vmFolderTree, vmDumpFilePath, num):
     backups = get_merge_of_backups(backupsToUpload, backupsInDumpFile)
     logging.debug("the merging of the 2 backups is:\n {0}".format(print_all_backups_infos(backups)))
     sort_and_remove_old_backups(backups, num)
-    logging.debug("cleaned old backups (max {0} backups), the result is {1}".format(num, print_all_backups_infos(backups)))
+    logging.debug("cleaned old backups (max {0} backups), the result is;\n {1}".format(num, print_all_backups_infos(backups)))
     try:
         sync_backups_with_ftp_server(vmFolderTree, backups)
     except Exception as ex:
@@ -128,12 +128,13 @@ def get_only_new_backups(dic, numberOfBackupsToTake):
     '''
     returns only the backups between range [0:numberOfBackupsToTake]
     '''
+    maxBackups = int(numberOfBackupsToTake)
     currentIndex = 0
     result = {}
     keys = dic.keys()
     keys.sort()
     for key in keys:
-        if currentIndex < numberOfBackupsToTake:
+        if currentIndex < maxBackups:
             result[key] = dic[key]
             currentIndex +=1
         else: return result
@@ -196,17 +197,16 @@ def get_ftpHost_by_vmName(vmName):
 def print_all_backups_infos(backups):
     result = ""
     for vmName in backups:
-        result += "Backups of virtual machine " + vmName + "\n"
+        result += "-[" + vmName + "]\n"
         result += print_backup_info(backups[vmName])
     return result
 
 def print_backup_info(backup):
     result = ""
     for date in backup:
-        result += "- Taken on: {0} ".format(date.strftime("%d-%m-%Y at %H:%M:%S")) + ". this backup contains: \n"
-        result += "|--- " + date.strftime("%Y-%m-%d-%H%M%S") + "\n"
+        result += "\t---[" + date.strftime("%Y-%m-%d-%H%M%S") + "]\n"
         for file in backup[date]:
-            result += "     |-- " + file + "\n"
+            result += "\t\t--" + file + "\n"
     return result
 
 

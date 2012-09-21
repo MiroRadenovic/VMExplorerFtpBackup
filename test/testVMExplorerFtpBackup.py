@@ -34,6 +34,10 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                                     },
                         'Raoul' :  {
                                         dateFromString('21/11/2016 16:36') :  [ 'raoulFile1,txt']
+                                    },
+                        'Miro' :   {
+                                        # this is just a duplicate to make sure that duplicates are not doubled in the merge result
+                                        dateFromString('21/11/2046 16:30') : [ 'bartFile1.txt','bartFile1.2.txt']
                                     }
                         }
         destinationBackUp = {
@@ -75,6 +79,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         self.assertTrue('Raoul' in result)
         self.assertTrue(dateFromString('21/11/2016 16:36') in result['Raoul'])
         self.assertTrue('Miro' in result)
+        self.assertTrue(len(result['Miro']) == 2)
         self.assertTrue(dateFromString('21/11/2046 16:30') in result['Miro'])
         self.assertTrue(dateFromString('21/11/2045 16:30') in result['Miro'])
 
@@ -162,6 +167,10 @@ class testVMExplorerFtpBackup(unittest.TestCase):
             'Raoul' :  {
                 #this backup should be uploaded
                 dateFromString('21/11/2016 16:36') :  [ 'raoulFile1,txt']
+            },
+            'Miro' :   {
+                # this is just a duplicate to make sure that in the diff result this key is not doubled
+                dateFromString('21/11/2046 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
             }
         }
         remoteBackups = {
