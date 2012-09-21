@@ -242,7 +242,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                         }
                     }
                     #act
-                    VMExplorerFtpBackup.upload_backups_with_ftp_server('/', localBackups)
+                    VMExplorerFtpBackup.upload_backups_to_ftp_server('/', localBackups)
 
 #    @patch('config.VmToFtp', mockFtpConnectionsConfig)
     def testRebuild_dump_file_from_backups_on_ftphosts(self):

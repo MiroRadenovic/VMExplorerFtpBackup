@@ -74,7 +74,7 @@ def start_backup(vmFolderTree, vmDumpFilePath, num):
     sort_and_remove_old_backups(backups, num)
     logging.debug("cleaned old backups (max {0} backups), the result is;\n {1}".format(num, backupRender.print_all_backups_infos(backups)))
     try:
-        upload_backups_with_ftp_server(vmFolderTree, backups)
+        upload_backups_to_ftp_server(vmFolderTree, backups)
     except Exception as ex:
         logging.error("An error occured while syncing the backup: {0}".format(ex))
         raise ex
@@ -138,11 +138,11 @@ def get_only_new_backups(dic, numberOfBackupsToTake):
         result[key] = dic[key]
     return result
 
-def upload_backups_with_ftp_server(vmPathBackupFolderTree, backups):
+def upload_backups_to_ftp_server(vmPathBackupFolderTree, backups):
     logging.info("uploading to ftp has started")
     for vmName in backups:
         ftphost = get_ftpHost_by_vmName(vmName)
-        logging.info("backup's upload for virtual Machine {0} on ftp server {1} will now start".format(vmName, ftphost.hostname))
+        logging.info("backup's upload and deletion of virtual Machine {0} on ftp server {1} will now start!".format(vmName, ftphost.hostname))
         backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
         if len(backupsToDelete) > 0:
             backupManager.delete_backups_from_ftpHost(backupsToDelete, ftphost)

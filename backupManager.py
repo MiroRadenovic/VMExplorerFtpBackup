@@ -90,10 +90,13 @@ def _getBackupsFromVirtualMachineFolder_(pathToVmFolder):
 
 def delete_backups_from_ftpHost(backupsToDelete, ftpHost):
     # first delete the backups that are on the remote ftp server that are not present in the backups dic
+    logging.info("some old backups on the ftp server needs to be deleted.")
     for bkToDelete in backupsToDelete:
         for dateBackup in backupsToDelete[bkToDelete]:
-            ftpHost.rmtree(
-                "{0}/{1}/{2}".format(ftpHost.remoteVmFolder, bkToDelete, dateBackup.strftime("%Y-%m-%d-%H%M%S")))
+            logging.info("{0}'s backup of date {1} will be now deleted".format(bkToDelete, dateBackup))
+            remotePathToDelete= "{0}/{1}/{2}".format(ftpHost.remoteVmFolder, bkToDelete, dateBackup.strftime("%Y-%m-%d-%H%M%S"))
+            ftpHost.rmtree(remotePathToDelete)
+            logging.info("ftp remote path {0} has been deleted successfully")
 
 
 def get_backups_for_upload_and_delete(backups, ftpHost):
