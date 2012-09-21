@@ -24,6 +24,7 @@ import optparse
 import logging
 
 import backupManager
+import backupRender
 import backupSerializer
 import ftpHostFactory
 
@@ -65,15 +66,15 @@ def main(params):
 
 def start_backup(vmFolderTree, vmDumpFilePath, num):
     backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTree)
-    logging.debug("folder tree inspection from path {0} has found the following backups that will be uploaded \n {1}".format(vmFolderTree, print_all_backups_infos(backupsToUpload)))
+    logging.debug("folder tree inspection from path {0} has found the following backups that will be uploaded \n {1}".format(vmFolderTree, backupRender.print_all_backups_infos(backupsToUpload)))
     backupsInDumpFile = backupSerializer.getBackupsFromDumpFile(vmDumpFilePath)
-    logging.debug("current backup status is (from dumpfile {0}) \n: {1}".format(vmDumpFilePath, print_all_backups_infos(backupsInDumpFile)))
+    logging.debug("current backup status is (from dumpfile {0}) \n: {1}".format(vmDumpFilePath, backupRender.print_all_backups_infos(backupsInDumpFile)))
     backups = get_merge_of_backups(backupsToUpload, backupsInDumpFile)
-    logging.debug("the merging of the 2 backups is:\n {0}".format(print_all_backups_infos(backups)))
+    logging.debug("the merging of the 2 backups is:\n {0}".format(backupRender.print_all_backups_infos(backups)))
     sort_and_remove_old_backups(backups, num)
-    logging.debug("cleaned old backups (max {0} backups), the result is;\n {1}".format(num, print_all_backups_infos(backups)))
+    logging.debug("cleaned old backups (max {0} backups), the result is;\n {1}".format(num, backupRender.print_all_backups_infos(backups)))
     try:
-        sync_backups_with_ftp_server(vmFolderTree, backups)
+        upload_backups_with_ftp_server(vmFolderTree, backups)
     except Exception as ex:
         logging.error("An error occured while syncing the backup: {0}".format(ex))
         raise ex
@@ -91,7 +92,7 @@ def rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
             host = get_ftpHost_by_vmName(vmName)
             backupsInFtpHost = backupManager.getBackupsFromFtpServer(host)
             _merge_first_backup_into_second_backup(backupsInFtpHost, backups)
-    print_all_backups_infos(backups)
+    backupRender.print_all_backups_infos(backups)
     backupSerializer.saveBackupToDumpFile(backups, dumpFilePath)
     return backups
 
@@ -101,7 +102,7 @@ def display_dump_file(dumpFilePath):
     displays the content of the given dump file
     '''
     backupsToDisplay = backupSerializer.getBackupsFromDumpFile(dumpFilePath)
-    print(print_all_backups_infos(backupsToDisplay))
+    print(backupRender.print_all_backups_infos(backupsToDisplay))
 
 
 # helpers
@@ -140,47 +141,22 @@ def get_only_new_backups(dic, numberOfBackupsToTake):
         else: return result
     return result
 
-def sync_backups_with_ftp_server(vmPathBackupFolderTree, backups):
-    logging.info("syncing to ftp has started")
+
+
+
+
+def upload_backups_with_ftp_server(vmPathBackupFolderTree, backups):
+    logging.info("uploading to ftp has started")
     for vmName in backups:
         ftphost = get_ftpHost_by_vmName(vmName)
-        logging.debug("backup of virtual machine {0}  will be now uploaded to {1} ftp server".format(vmName, ftphost.hostname))
-        backupsOnServer = backupManager.getBackupsFromFtpServer(ftphost)
-        logging.debug("ftp server {0} has already the following backups:\n {1}".format(ftphost.hostname, print_all_backups_infos(backupsOnServer)))
-        backupsToDelete = get_backups_diff(backups, backupsOnServer)
-        logging.debug("the following files will be deleted: \n {0}".format(print_all_backups_infos(backupsToDelete)))
-        backupsToUpload = get_backups_diff(backupsOnServer, backups)
-        logging.debug("the following files will be uploaded to the ftp server:{0}\n".format(print_all_backups_infos(backupsToDelete)))
+        logging.info("backup's upload for virtual Machine {0} on ftp server {1} will now start".format(vmName, ftphost.hostname))
+        backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
+        if len(backupsToDelete) > 0:
+            backupManager.delete_backups_from_ftpHost(backupsToDelete, ftphost)
+        if len(backupsToUpload) > 0:
+            backupManager.upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree)
 
-        # todo: uncomment
-        # first delete the backups that are on the remote ftp server that are not present in the backups dic
-        for bkToDelete in backupsToDelete:
-            for dateBackup in backupsToDelete[bkToDelete]:
-                ftphost.rmtree("{0}/{1}/{2}".format(vmPathBackupFolderTree , bkToDelete , dateBackup.strftime("%Y-%m-%d-%H%M%S")))
-
-        #then upload the backups that are not present in the remote ftp
-        for bkToUpload in backupsToUpload:
-            if bkToUpload == vmName:
-                for dateBackup in backupsToUpload[bkToUpload]:
-                    # format datetime as 2000-08-28-154138
-                    dateFolder =  dateBackup.strftime("%Y-%m-%d-%H%M%S")
-                    ftphost.syncFolders("{0}/{1}/{2}".format(vmPathBackupFolderTree , bkToUpload ,dateFolder), "{0}/{1}/{2}".format(ftphost.remoteVmFolder, bkToUpload , dateFolder ))
     logging.info("syncing to ftp has finished successfully")
-
-def get_backups_diff(backUpSource, backUpToDiff):
-    '''
-    return a diff between the backUpSource and backUpToDiff
-    '''
-    result = {}
-    for vmName in backUpToDiff:
-        if backUpSource.has_key(vmName):
-            foldersToDelete = {}
-            for date in backUpToDiff[vmName]:
-                if not backUpSource[vmName].has_key(date):
-                    foldersToDelete[date] =  backUpToDiff[vmName][date]
-            if len(foldersToDelete) > 0 : result[vmName] = foldersToDelete
-        else: result[vmName] = backUpToDiff[vmName]
-    return result
 
 def get_ftpHost_by_vmName(vmName):
     '''
@@ -193,22 +169,6 @@ def get_ftpHost_by_vmName(vmName):
         # connect to ftp server
     ftphost = ftpHostFactory.create_ftpHost(hostname=connectionInfo[0], port=connectionInfo[1], user=connectionInfo[2],password=connectionInfo[3], remoteFolder=connectionInfo[4])
     return ftphost
-
-def print_all_backups_infos(backups):
-    result = ""
-    for vmName in backups:
-        result += "-[" + vmName + "]\n"
-        result += print_backup_info(backups[vmName])
-    return result
-
-def print_backup_info(backup):
-    result = ""
-    for date in backup:
-        result += "\t---[" + date.strftime("%Y-%m-%d-%H%M%S") + "]\n"
-        for file in backup[date]:
-            result += "\t\t--" + file + "\n"
-    return result
-
 
 #---------------------------
 #     private methods
@@ -250,9 +210,6 @@ def _import_ftp_config(configToImport):
         config = __import__(configToImport, globals(), locals(), [], -1)
     except ImportError:
         logging.error("Cannot import configuration {0}. ".format(configToImport))
-
-def _print_progress_bar(chunk):
-    print chunk
 
 
 if __name__ == "__main__":

@@ -143,7 +143,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                 dateFromString('21/11/2003 16:31') : [ 'bartFile2','file.txt2.2']
             }
         }
-        backupsToDelete = VMExplorerFtpBackup.get_backups_diff(localBackups, remoteBackups)
+        backupsToDelete = backupManager.get_backups_diff(localBackups, remoteBackups)
         self.assertTrue(backupsToDelete != None)
         self.assertTrue(backupsToDelete.has_key('Miro'))
         self.assertTrue(len(backupsToDelete['Miro']) == 2)
@@ -183,7 +183,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                 dateFromString('21/11/2003 16:31') : [ 'bartFile2','file.txt2.2']
             }
         }
-        backupToUpload = VMExplorerFtpBackup.get_backups_diff(remoteBackups, localBackups)
+        backupToUpload = backupManager.get_backups_diff(remoteBackups, localBackups)
         self.assertTrue(backupToUpload != None)
         self.assertTrue(backupToUpload.has_key('Bart'))
         self.assertTrue(len(backupToUpload['Bart']) == 1)
@@ -242,7 +242,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                         }
                     }
                     #act
-                    VMExplorerFtpBackup.sync_backups_with_ftp_server('/', localBackups)
+                    VMExplorerFtpBackup.upload_backups_with_ftp_server('/', localBackups)
 
 #    @patch('config.VmToFtp', mockFtpConnectionsConfig)
     def testRebuild_dump_file_from_backups_on_ftphosts(self):
