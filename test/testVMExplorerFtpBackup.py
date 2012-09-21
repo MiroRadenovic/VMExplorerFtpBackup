@@ -87,17 +87,20 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         '''ensures that by a given backup VMExplorerFtpBackup.sortAndRemoveOldBackups can sort backups by date and keep
         just a specified number of backups by removing old ones
         '''
+
         backup= { 'Bart' :   {
-            dateFromString('21/11/2006 16:25') : [ 'c' ],
-            dateFromString('25/11/2006 16:31') : [ 'skip'],
-            dateFromString('21/11/2006 16:26') : [ 'd'],
-            dateFromString('23/11/2006 16:39') : [ 'skip'],
-            dateFromString('24/11/2006 16:31') : [ 'skip'],
-            dateFromString('21/11/2006 16:31') : [ 'e'],
-            dateFromString('21/10/2005 16:31') : [ 'b'],
-            dateFromString('21/10/2003 16:31') : [ 'a']
-                 }
-            }
+            dateFromString('20/10/2005 16:25') : [ 'skip' ],
+            dateFromString('01/01/2007 16:25') : [ 'c' ],
+            dateFromString('21/11/2006 16:25') : [ 'skip' ],
+            dateFromString('22/11/2006 16:25') : [ 'e' ],
+            dateFromString('01/02/2007 16:26') : [ 'a' ],
+            dateFromString('22/12/2006 16:25') : [ 'd' ],
+            dateFromString('20/10/2006 16:25') : [ 'skip' ],
+            dateFromString('20/11/2006 16:25') : [ 'skip' ],
+            dateFromString('01/02/2007 16:25') : [ 'b' ],
+
+        }
+        }
 
         #act
         VMExplorerFtpBackup.sort_and_remove_old_backups(backup, 5)
@@ -109,11 +112,11 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         for vmKey in bartBackup:
             self.assertTrue(bartBackup[vmKey] != ['skip'])
 
-        self.assertEqual( bartBackup[dateFromString('21/10/2003 16:31')], ['a'])
-        self.assertEqual( bartBackup[dateFromString('21/10/2005 16:31')], ['b'])
-        self.assertEqual( bartBackup[dateFromString('21/11/2006 16:25')], ['c'])
-        self.assertEqual( bartBackup[dateFromString('21/11/2006 16:26')], ['d'])
-        self.assertEqual( bartBackup[dateFromString('21/11/2006 16:31')], ['e'])
+        self.assertEqual( bartBackup[dateFromString('01/02/2007 16:26')], ['a'])
+        self.assertEqual( bartBackup[dateFromString('01/02/2007 16:25')], ['b'])
+        self.assertEqual( bartBackup[dateFromString('01/01/2007 16:25')], ['c'])
+        self.assertEqual( bartBackup[dateFromString('22/12/2006 16:25')], ['d'])
+        self.assertEqual( bartBackup[dateFromString('22/11/2006 16:25')], ['e'])
 
     def testGetBackupsDiff_RemoveOldBackups(self):
         '''
