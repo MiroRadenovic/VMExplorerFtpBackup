@@ -98,7 +98,6 @@ class testVMExplorerFtpBackup(unittest.TestCase):
             dateFromString('20/10/2006 16:25') : [ 'skip' ],
             dateFromString('20/11/2006 16:25') : [ 'skip' ],
             dateFromString('01/02/2007 16:25') : [ 'b' ],
-
         }
         }
 
@@ -273,7 +272,11 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                 testCase.fail('a request to the wrong backup upload has been invoked: {0}'.format(path) )
             print('upload invoked')
 
-        with patch.dict(config.VmToFtp, mockFtpConnectionsConfig, clear=True):
+        def mockConfig():
+            VMExplorerFtpBackup.config = __import__('config', globals(), locals(), [], -1)
+
+        #with patch.dict(config.VmToFtp, mockFtpConnectionsConfig, clear=True):
+        with patch.object(VMExplorerFtpBackup, '_import_ftp_config', side_effect = mockConfig):
             with patch.object(backupManager, 'getBackupsFromFtpServer', return_value=remoteBackups):
                 with patch.object(backupSerializer, 'saveBackupToDumpFile'):
                     with patch.object(ftpHostFactory, 'create_ftpHost', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
