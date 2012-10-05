@@ -195,6 +195,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
         self.assertTrue(len(backupToUpload['Raoul']) == 1)
         self.assertTrue(backupToUpload['Raoul'][dateFromString('21/11/2016 16:36')] != None)
 
+
     def testSyncBackupsToFtp(self):
         '''
         ensures that when VMExplorerFtpBackup syncs backups to the remote server:
@@ -213,39 +214,51 @@ class testVMExplorerFtpBackup(unittest.TestCase):
             print('upload invoked')
 
 
-        mockConfig  = {
+        VMExplorerFtpBackup.config = mock.Mock()
+        VMExplorerFtpBackup.config.VmToFtp = {
             '*' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
             }
 
 
+        def sync_folders_side_effect(localPath, remotePath):
+            # "{0}/{1}/{2}".format(vmPathBackupFolderTree, bkToUpload, dateFolder),
+            if not (localPath.endswith('/Raoul/2016-11-21-163600') or localPath.endswith('/Bart/2006-11-21-163200')):
+                self.fail(msg='a wrong folder has been requested for the upload')
+
+        mockedFtp = mockFtp(self, callbackUploadAssert, callbackDeleteAssert)
+        mockedFtp.remoteVmFolder = mock.Mock().return_value('//')
+        mockedFtp.syncFolders =  mock.Mock().side_effect = sync_folders_side_effect
+
+
+
         # http://docs.python.org/dev/library/unittest.mock
         with patch.object(backupManager, 'getBackupsFromFtpServer')  as mock_method:
-            with patch.object(ftpHostFactory, 'create_ftpHost', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
-                with patch.dict(config.VmToFtp, mockConfig):
-                    # this are the backups stored on the ftp server
-                    mock_method.return_value = {
-                        'Bart' :   {
-                            # this backup must NOT be deleted, because is also in the local backup
-                            dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
-                            #this backup must be deleted. there are no information related this backup in the localBackups
-                            dateFromString('11/11/2001 16:30') : [ 'deleteME.txt']
-                        }
+            #with patch.object(ftpHostFactory, 'create_ftpHost', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
+            with patch.object(ftpHostFactory, 'create_ftpHost', return_value =  mockedFtp):
+                # this are the backups stored on the ftp server
+                mock_method.return_value = {
+                    'Bart' :   {
+                        # this backup must NOT be deleted, because is also in the local backup
+                        dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+                        #this backup must be deleted. there are no information related this backup in the localBackups
+                        dateFromString('11/11/2001 16:30') : [ 'deleteME.txt']
                     }
-                    # this represents the local backups.
-                    localBackups = {
-                        'Bart' :   {
-                            # this backup must NOT be uploaded, because it's already in ftp server
-                            dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
-                            #this backup must be uploaded, because it's not already present in the ftp server
-                            dateFromString('21/11/2006 16:32') : [  'uploadME2.txt']
-                        },
-                        'Raoul' :  {
-                            #this backup must be uploaded, because it's not already present in the ftp server
-                            dateFromString('21/11/2016 16:36') :  [ 'uploadME.txt']
-                        }
+                }
+                # this represents the local backups.
+                localBackups = {
+                    'Bart' :   {
+                        # this backup must NOT be uploaded, because it's already in ftp server
+                        dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
+                        #this backup must be uploaded, because it's not already present in the ftp server
+                        dateFromString('21/11/2006 16:32') : [  'uploadME2.txt']
+                    },
+                    'Raoul' :  {
+                        #this backup must be uploaded, because it's not already present in the ftp server
+                        dateFromString('21/11/2016 16:36') :  [ 'uploadME.txt']
                     }
-                    #act
-                    VMExplorerFtpBackup.upload_backups_to_ftp_server('/', localBackups)
+                }
+                #act
+                VMExplorerFtpBackup.upload_backups_to_ftp_server('/', localBackups)
 
     def testRebuild_dump_file_from_backups_on_ftphosts(self):
         '''
@@ -282,6 +295,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
 
                     result = VMExplorerFtpBackup._rebuild_dump_file_from_backups_on_ftphosts('dump.dm')
                     self.assertEqual(result, remoteBackups)
+
 
 
 

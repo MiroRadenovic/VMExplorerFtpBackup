@@ -61,12 +61,16 @@ def getBackupsFromFtpServer(ftpHost):
 
 def upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree):
     #then upload the backups that are not present in the remote ftp
+    baseLocalPath = ''
+    if not vmPathBackupFolderTree == '/':
+        baseLocalPath = vmPathBackupFolderTree
+
     for bkToUpload in backupsToUpload:
         if bkToUpload == vmName:
             for dateBackup in backupsToUpload[bkToUpload]:
                 # format datetime as 2000-08-28-154138
                 dateFolder = dateBackup.strftime("%Y-%m-%d-%H%M%S")
-                ftphost.syncFolders("{0}/{1}/{2}".format(vmPathBackupFolderTree, bkToUpload, dateFolder),
+                ftphost.syncFolders("{0}/{1}/{2}".format(baseLocalPath, bkToUpload, dateFolder),
                     "{0}/{1}/{2}".format(ftphost.remoteVmFolder, bkToUpload, dateFolder))
 
 def _getFilesFromFolder_(pathToBackUpFiles):

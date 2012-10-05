@@ -48,7 +48,6 @@ def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, re
     return result
 
 def sync(self, source_directory, target_directory):
-
     def ensure_remote_folder_exist(ftpHost, remoteFolder):
         try:
             ftpHost.listdir(currentFolder)
