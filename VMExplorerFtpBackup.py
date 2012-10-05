@@ -64,17 +64,23 @@ def main(params):
 
 # programs options
 
-def start_backup(vmFolderTree, vmDumpFilePath, num):
-    backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTree)
-    logging.debug("folder tree inspection from path {0} has found the following backups that will be uploaded \n {1}".format(vmFolderTree, backupRender.print_all_backups_infos(backupsToUpload)))
-    backupsInDumpFile = backupSerializer.getBackupsFromDumpFile(vmDumpFilePath)
-    logging.debug("current backup status is (from dumpfile {0}) \n: {1}".format(vmDumpFilePath, backupRender.print_all_backups_infos(backupsInDumpFile)))
+def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsToKeep):
+    '''
+    starts the backup programs.
+    Args:   vmFolderTreePath: str -> path of the folder that contains the virtual machines backups
+            vmBackupHistoryDumpFilePath: str -> path to the dump file that stores the backupHistory
+            numberOfBackupsToKeep: int -> number of tha max backups to keep. old backups will be removed
+    '''
+    backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTreePath)
+    logging.debug("folder tree inspection from path {0} has found the following backups that will be uploaded \n {1}".format(vmFolderTreePath, backupRender.print_all_backups_infos(backupsToUpload)))
+    backupsInDumpFile = backupSerializer.getBackupsFromDumpFile(vmBackupHistoryDumpFilePath)
+    logging.debug("current backup status is (from dumpfile {0}) \n: {1}".format(vmBackupHistoryDumpFilePath, backupRender.print_all_backups_infos(backupsInDumpFile)))
     backups = get_merge_of_backups(backupsToUpload, backupsInDumpFile)
     logging.debug("the merging of the 2 backups is:\n {0}".format(backupRender.print_all_backups_infos(backups)))
-    sort_and_remove_old_backups(backups, num)
-    logging.debug("cleaned old backups (max {0} backups), the result is;\n {1}".format(num, backupRender.print_all_backups_infos(backups)))
+    sort_and_remove_old_backups(backups, numberOfBackupsToKeep)
+    logging.debug("cleaned old backups (max {0} backups), the result is;\n {1}".format(numberOfBackupsToKeep, backupRender.print_all_backups_infos(backups)))
     try:
-        _upload_backups_to_ftp_server(vmFolderTree, backups)
+        _upload_backups_to_ftp_server(vmFolderTreePath, backups)
     except Exception as ex:
         logging.error("An error occured while syncing the backup: {0}".format(ex))
         raise ex
@@ -106,8 +112,10 @@ def display_dump_file(dumpFilePath):
     backupsToDisplay = backupSerializer.getBackupsFromDumpFile(dumpFilePath)
     print(backupRender.print_all_backups_infos(backupsToDisplay))
 
+#---------------------------
+#   public helpers methods
+#---------------------------
 
-# helpers
 
 def get_merge_of_backups(backup1, backup2):
     '''
@@ -146,6 +154,14 @@ def get_only_new_backups(dictionaryOfBackups, numberOfBackupsToTake):
         result[key] = dictionaryOfBackups[key]
     return result
 
+
+
+
+#---------------------------
+#     private methods
+#---------------------------
+
+
 def _upload_backups_to_ftp_server(vmPathBackupFolderTree, backups):
     '''
     uploads backups to the ftp server defined in the config file
@@ -164,11 +180,6 @@ def _upload_backups_to_ftp_server(vmPathBackupFolderTree, backups):
 
     logging.info("syncing to ftp has finished successfully")
 
-
-
-#---------------------------
-#     private methods
-#---------------------------
 
 def _merge_first_backup_into_second_backup(backupToJoin, destinationBackupToJoin):
     '''
