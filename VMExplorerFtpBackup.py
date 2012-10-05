@@ -45,7 +45,7 @@ def main(params):
             if answer.lower() == 'y':
                 try:
                     logging.info('user selected option [Y] = delete old dump file and rebuild new one')
-                    rebuild_dump_file_from_backups_on_ftphosts(params.dumpFilePath)
+                    _rebuild_dump_file_from_backups_on_ftphosts(params.dumpFilePath)
                     logging.info('a new backup dump file has been created with the following backup info: \n{0}'.format(display_dump_file(params.dumpFilePath)))
                 except Exception as ex:
                     logging.error(ex)
@@ -82,7 +82,7 @@ def start_backup(vmFolderTree, vmDumpFilePath, num):
     # todo: must save
 
 
-def rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
+def _rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
     '''
     rebuilds a new dump file by scanning all ftp server's
     '''

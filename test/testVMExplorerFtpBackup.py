@@ -1,4 +1,5 @@
 from datetime import datetime
+import mock
 
 import VMExplorerFtpBackup
 import backupManager
@@ -196,8 +197,8 @@ class testVMExplorerFtpBackup(unittest.TestCase):
 
     def testSyncBackupsToFtp(self):
         '''
-        ensures that when VMExplorerFtpBackup syncs backsup to the remote server:
-        1) deletes old backups on the rmeote server
+        ensures that when VMExplorerFtpBackup syncs backups to the remote server:
+        1) deletes old backups on the remote server
         2) uploads only new backups that are not already present.
         '''
 
@@ -246,8 +247,10 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                     #act
                     VMExplorerFtpBackup.upload_backups_to_ftp_server('/', localBackups)
 
-#    @patch('config.VmToFtp', mockFtpConnectionsConfig)
     def testRebuild_dump_file_from_backups_on_ftphosts(self):
+        '''
+        ensures that the backups
+        '''
         remoteBackups = {
             'Bart' :   {
                 dateFromString('21/11/2006 16:30') : [ 'bartFile1.txt','bartFile1.2.txt'],
@@ -258,30 +261,27 @@ class testVMExplorerFtpBackup(unittest.TestCase):
             }
         }
 
+        # arrange the asserts
+        def callbackDeleteAssert(testCase,path):
+            pass
+        def callbackUploadAssert(testCase, path):
+            pass
 
-        mockFtpConnectionsConfig  = {
+
+        VMExplorerFtpBackup.config = mock.Mock()
+        VMExplorerFtpBackup.config.VmToFtp = {
             'Bart' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
             'Ken' : ['localhost', '2001', 'anonymous', 'anonymous', '/' ],
             }
 
-        # arrange the assserts
-        def callbackDeleteAssert(testCase,path):
-            pass
-        def callbackUploadAssert(testCase, path):
-            if not (path.endswith('163600') or path.endswith('163200') or path.endswith('163000')):
-                testCase.fail('a request to the wrong backup upload has been invoked: {0}'.format(path) )
-            print('upload invoked')
 
-        def mockConfig():
-            VMExplorerFtpBackup.config = __import__('config', globals(), locals(), [], -1)
+        with patch.object(backupManager, 'getBackupsFromFtpServer', return_value=remoteBackups):
+            with patch.object(backupSerializer, 'saveBackupToDumpFile'):
+                with patch.object(ftpHostFactory, 'create_ftpHost', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
+                    # mock a config.VmToFtp dependency
 
-        #with patch.dict(config.VmToFtp, mockFtpConnectionsConfig, clear=True):
-        with patch.object(VMExplorerFtpBackup, '_import_ftp_config', side_effect = mockConfig):
-            with patch.object(backupManager, 'getBackupsFromFtpServer', return_value=remoteBackups):
-                with patch.object(backupSerializer, 'saveBackupToDumpFile'):
-                    with patch.object(ftpHostFactory, 'create_ftpHost', return_value =  mockFtp(self, callbackUploadAssert, callbackDeleteAssert)):
-                        result = VMExplorerFtpBackup.rebuild_dump_file_from_backups_on_ftphosts('dump.dm')
-                        self.assertEqual(result, remoteBackups)
+                    result = VMExplorerFtpBackup._rebuild_dump_file_from_backups_on_ftphosts('dump.dm')
+                    self.assertEqual(result, remoteBackups)
 
 
 
