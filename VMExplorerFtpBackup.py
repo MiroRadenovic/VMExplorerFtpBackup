@@ -72,13 +72,13 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
             numberOfBackupsToKeep: int -> number of tha max backups to keep. old backups will be removed
     '''
     backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTreePath)
-    logging.debug("folder tree inspection from path {0} has found the following backups that will be uploaded \n {1}".format(vmFolderTreePath, backupRender.print_all_backups_infos(backupsToUpload)))
-    backupsInDumpFile = backupSerializer.getBackupsFromDumpFile(vmBackupHistoryDumpFilePath)
-    logging.debug("current backup status is (from dumpfile {0}) \n: {1}".format(vmBackupHistoryDumpFilePath, backupRender.print_all_backups_infos(backupsInDumpFile)))
+    logging.debug("folder tree inspection from path {0} has found the following backups that will be uploaded \n {1}".format(vmFolderTreePath, backupRender.get_backups_infos(backupsToUpload)))
+    backupsInDumpFile = backupSerializer.get_backups_from_dump_file_or_None(vmBackupHistoryDumpFilePath)
+    logging.debug("current backup status is (from dumpfile {0}) \n: {1}".format(vmBackupHistoryDumpFilePath, backupRender.get_backups_infos(backupsInDumpFile)))
     backups = get_merge_of_backups(backupsToUpload, backupsInDumpFile)
-    logging.debug("the merging of the 2 backups is:\n {0}".format(backupRender.print_all_backups_infos(backups)))
+    logging.debug("the merging of the 2 backups is:\n {0}".format(backupRender.get_backups_infos(backups)))
     sort_and_remove_old_backups(backups, numberOfBackupsToKeep)
-    logging.debug("cleaned old backups (max {0} backups), the result is;\n {1}".format(numberOfBackupsToKeep, backupRender.print_all_backups_infos(backups)))
+    logging.debug("cleaned old backups (max {0} backups), the result is;\n {1}".format(numberOfBackupsToKeep, backupRender.get_backups_infos(backups)))
     try:
         _upload_backups_to_ftp_server(vmFolderTreePath, backups)
     except Exception as ex:
@@ -99,7 +99,7 @@ def _rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
             host = _get_ftpHost_by_vmName(vmName)
             backupsInFtpHost = backupManager.getBackupsFromFtpServer(host)
             _merge_first_backup_into_second_backup(backupsInFtpHost, backups)
-    backupRender.print_all_backups_infos(backups)
+    backupRender.get_backups_infos(backups)
     backupSerializer.saveBackupToDumpFile(backups, dumpFilePath)
     return backups
 
@@ -109,8 +109,8 @@ def display_dump_file(dumpFilePath):
     displays the content of the given dump file into the console
     Args: dumpFilePath: str -> the path of the dump file to display
     '''
-    backupsToDisplay = backupSerializer.getBackupsFromDumpFile(dumpFilePath)
-    print(backupRender.print_all_backups_infos(backupsToDisplay))
+    backupsToDisplay = backupSerializer.get_backups_from_dump_file_or_None(dumpFilePath)
+    print(backupRender.get_backups_infos(backupsToDisplay))
 
 #---------------------------
 #   public helpers methods

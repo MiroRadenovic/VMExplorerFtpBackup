@@ -109,17 +109,17 @@ def get_backups_for_upload_and_delete(backups, ftpHost):
     '''
     backupsOnServer = getBackupsFromFtpServer(ftpHost)
     logging.debug("ftp server {0} has already the following backups:\n {1}".format(ftpHost.hostname,
-        backupRender.print_all_backups_infos(backupsOnServer)))
+        backupRender.get_backups_infos(backupsOnServer)))
     backupsToDelete = get_backups_diff(backups, backupsOnServer)
     if len(backupsToDelete) > 0:
-        logging.info("the following files will be deleted: \n {0}".format(backupRender.print_all_backups_infos(backupsToDelete)))
+        logging.info("the following files will be deleted: \n {0}".format(backupRender.get_backups_infos(backupsToDelete)))
     else: logging.info(
         "there is no need to delete old backups on {0} ftp server: no old backups have been found".format(
             ftpHost.hostname))
     backupsToUpload = get_backups_diff(backupsOnServer, backups)
     if len(backupsToUpload) > 0:
         logging.debug("the following files will be uploaded to the ftp server:{0}\n".format(
-            backupRender.print_all_backups_infos(backupsToDelete)))
+            backupRender.get_backups_infos(backupsToDelete)))
     else: logging.warn(
         "there is no need to upload new backups on {0} ftp server:the server has newer backups than local folder".format(
             ftpHost.hostname))
