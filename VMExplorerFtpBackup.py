@@ -233,6 +233,10 @@ def _import_ftp_config(configToImport):
         logging.error("Cannot import configuration {0}. ".format(configToImport))
 
 
+#---------------------------
+#    program start
+#---------------------------
+
 if __name__ == "__main__":
     parser = optparse.OptionParser()
     # todo: how to use confilcs?
