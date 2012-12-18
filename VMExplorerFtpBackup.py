@@ -86,9 +86,7 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
 
     logging.debug("saving Virtual Machines uploads to the the dumpfile on path: {0}".format(vmBackupHistoryDumpFilePath))
     backupSerializer.saveBackupToDumpFile(backups, vmBackupHistoryDumpFilePath)
-
-
-    # todo: must save
+    logging.debug("the backups stored in the dump file are {0}".format(backupRender.get_backups_infos(backups)))
 
 
 def _rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
