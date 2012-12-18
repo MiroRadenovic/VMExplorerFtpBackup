@@ -51,7 +51,7 @@ def main(params):
             else :
                 print('ok, leaving... bye bye!')
         elif(params.status):
-            display_dump_file(params.dumpfilepath)
+            display_dump_file(params.dumpFilePath)
         elif(params.start):
             start_backup(params.folder, params.dumpFilePath, params.numberOfBackups)
 
