@@ -50,11 +50,11 @@ def main(params):
                     logging.error(ex)
             else :
                 print('ok, leaving... bye bye!')
+        elif(params.status):
+            display_dump_file(params.dumpfilepath)
         elif(params.start):
             start_backup(params.folder, params.dumpFilePath, params.numberOfBackups)
 
-        elif(params.status):
-            display_dump_file(params.dumpfilepath)
     except Exception as ex:
         logging.error(ex)
         return 1
