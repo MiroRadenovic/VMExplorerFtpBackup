@@ -244,6 +244,8 @@ def _import_ftp_config(configToImport):
             logging.debug(machineName)
     except ImportError:
         logging.error("Cannot import configuration {0}. ".format(configToImport))
+        raise ImportError
+
 
 
 #---------------------------
