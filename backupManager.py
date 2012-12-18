@@ -33,12 +33,16 @@ def getBackupsFromFolderTree(pathToFolder):
         returns: [dictionary] backup info '''
 
     resultBackups = {}
-    vmNamesToBackup = os.listdir(pathToFolder)
-    for vm in vmNamesToBackup:
-        pathToVmfolder = os.path.join(pathToFolder, vm)
-        serverBackup = _getBackupsFromVirtualMachineFolder_(pathToVmfolder)
-        resultBackups[vm] = serverBackup
-    return resultBackups
+    try:
+        vmNamesToBackup = os.listdir(pathToFolder)
+        for vm in vmNamesToBackup:
+            pathToVmfolder = os.path.join(pathToFolder, vm)
+            serverBackup = _getBackupsFromVirtualMachineFolder_(pathToVmfolder)
+            resultBackups[vm] = serverBackup
+        return resultBackups
+    except Exception:
+        logging.error("An error occurred using the provided local path {0} for building the VM backup tree. Are you sure you have "
+                      "specified the correct path where your vm backs are stored? are you using the correct folder name patter for dates?")
 
 def getBackupsFromFtpServer(ftpHost):
     # this is a dirty bug fix. the listdir cmd need to be executed twice to return the correct value,
