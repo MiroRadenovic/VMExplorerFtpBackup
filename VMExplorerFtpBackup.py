@@ -27,6 +27,7 @@ import backupManager
 import backupRender
 import backupSerializer
 import ftpHostFactory
+from subprocess import Popen
 
 config = None
 
@@ -55,10 +56,18 @@ def main(params):
         elif(params.start):
             start_backup(params.folder, params.dumpFilePath, params.numberOfBackups)
 
+        # if everthing runs ok, then we can execute esternal programs if -x params has been specified.
+        if params.execute != None:
+            logging.debug('-x has been specified. running: {0}'.format(params.execute))
+            p = Popen(params.execute)
+            stdout, stderr = p.communicate()
+            logging.debug(stdout)
+
     except Exception as ex:
         logging.error(ex)
         return 1
 
+    logging.debug("the program has terminated. byee!")
     return 0
 
 # programs options
@@ -252,6 +261,7 @@ if __name__ == "__main__":
     #display info options
     parser.add_option('-z', '--status', help='displays the status of the backups: info related to the next upload and the current dump file', dest='status', action="store_true", default=False)
     parser.add_option('-v', '--verbose', help='set the verbosity level. accepted values are: info, warn, error and debug', dest='verbosity', default='info')
+    parser.add_option('-x', '--execute', help='runs a program if no errors occurs after the backup sync has performed', dest='execute')
 
     (opts, args) = parser.parse_args()
     main(opts)
