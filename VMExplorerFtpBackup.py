@@ -236,6 +236,7 @@ def _configure_logger(verbosity):
         logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 def _import_ftp_config(configToImport):
+    logging.debug('the ftp connection config file that will be used is {0}'.format(configToImport))
     try:
         global config
         config = __import__(configToImport, globals(), locals(), [], -1)
