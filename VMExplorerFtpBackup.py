@@ -31,12 +31,20 @@ from subprocess import Popen
 
 config = None
 
+_softwareVersion = 0.1
+
 # program start
+
+
+
 
 def main(params):
 
+
     _configure_logger(params.verbosity)
+    _draw_welcome_banner()
     _import_ftp_config(params.configFtp)
+
 
 
     try:
@@ -247,6 +255,8 @@ def _import_ftp_config(configToImport):
         logging.error("Cannot import configuration {0}. ".format(configToImport))
         raise ImportError
 
+def _draw_welcome_banner():
+    logging.debug("########## VMExplorerFtpBackUp v.{0} #############".format(_softwareVersion))
 
 
 #---------------------------
