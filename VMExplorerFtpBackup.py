@@ -40,7 +40,6 @@ def main(params):
 
     try:
         if(params.rebuildDumpFile):
-            # todo: leaqrn how to use input
             answer = raw_input('This option will delete the current dump file and rebuild a new one. all backup statuses'' will be lost. press [Y] to confirm and continue\n')
             if answer.lower() == 'y':
                 try:
@@ -84,6 +83,10 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
     except Exception as ex:
         logging.error("An error occured while syncing the backup: {0}".format(ex))
         raise ex
+
+    logging.debug("saving Virtual Machines uploads to the the dumpfile on path: {0}".format(vmBackupHistoryDumpFilePath))
+    backupSerializer.saveBackupToDumpFile(backups, vmBackupHistoryDumpFilePath)
+
 
     # todo: must save
 
@@ -168,10 +171,10 @@ def _upload_backups_to_ftp_server(vmPathBackupFolderTree, backups):
     args:   vmPathBackupFolderTree: str -> the base folder tree path where the backups are stored in the local filesystem
             backups: dic -> a dictionary that holds the backups that needs to be uploaded to the server
     '''
-    logging.info("uploading to ftp has started")
+    logging.info("Ftp sync will now start")
     for vmName in backups:
         ftphost = _get_ftpHost_by_vmName(vmName)
-        logging.info("backup's upload and deletion of virtual Machine {0} on ftp server {1} will now start!".format(vmName, ftphost.hostname))
+        logging.info("- backup's sync for virtual machine {0} with ftp server {1} begins:".format(vmName, ftphost.hostname))
         backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
         if len(backupsToDelete) > 0:
             backupManager.delete_backups_from_ftpHost(backupsToDelete, ftphost)
