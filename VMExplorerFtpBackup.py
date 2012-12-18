@@ -239,6 +239,9 @@ def _import_ftp_config(configToImport):
     try:
         global config
         config = __import__(configToImport, globals(), locals(), [], -1)
+        logging.debug("the following machines have a defined ftp connection in the config file")
+        for machineName in config.VmToFtp:
+            logging.debug(machineName)
     except ImportError:
         logging.error("Cannot import configuration {0}. ".format(configToImport))
 
