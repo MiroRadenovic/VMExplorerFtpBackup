@@ -41,6 +41,7 @@ def getBackupsFromFolderTree(pathToFolder):
     return resultBackups
 
 def getBackupsFromFtpServer(ftpHost):
+    # this is a dirty bug fix. the listdir cmd need to be executed twice to return the correct value,
     ftplist = None
     try:
         ftplist = ftpHost.listdir('.')
