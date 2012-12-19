@@ -28,6 +28,7 @@ import backupRender
 import backupSerializer
 import ftpHostFactory
 from subprocess import Popen
+import traceback
 
 config = None
 
@@ -98,7 +99,7 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
     try:
         _upload_backups_to_ftp_server(vmFolderTreePath, backups)
     except Exception as ex:
-        logging.error("An error occured while syncing the backup: {0}".format(ex))
+        logging.error("An error occurred while syncing the backup: {0}\n trace: {1}".format(ex, traceback.format_exc()))
         raise ex
 
     logging.debug("saving Virtual Machines uploads to the the dumpfile on path: {0}".format(vmBackupHistoryDumpFilePath))
@@ -250,14 +251,15 @@ def _import_ftp_config(configToImport):
         config = __import__(configToImport, globals(), locals(), [], -1)
         logging.debug("the following machines have a defined ftp connection in the config file")
         for machineName in config.VmToFtp:
-            logging.debug(machineName)
+            logging.debug('- ' + machineName)
     except ImportError:
         logging.error("Cannot import configuration {0}. ".format(configToImport))
         raise ImportError
 
 def _draw_welcome_banner():
     logging.debug("########## VMExplorerFtpBackUp v.{0} #############".format(_softwareVersion))
-    logging.debug("##################################################")
+    logging.debug("##################################################\n\n")
+
 
 
 

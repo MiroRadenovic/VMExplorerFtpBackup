@@ -70,31 +70,19 @@ def upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFold
     if not vmPathBackupFolderTree == '/':
         baseLocalPath = vmPathBackupFolderTree
 
+    logging.debug('The uploads of the VM backups will now start!')
+
     for bkToUpload in backupsToUpload:
         if bkToUpload == vmName:
             for dateBackup in backupsToUpload[bkToUpload]:
                 # format datetime as 2000-08-28-154138
                 dateFolder = dateBackup.strftime("%Y-%m-%d-%H%M%S")
-                ftphost.syncFolders("{0}/{1}/{2}".format(baseLocalPath, bkToUpload, dateFolder),
-                    "{0}/{1}/{2}".format(ftphost.remoteVmFolder, bkToUpload, dateFolder))
+                localFolderPath = "{0}/{1}/{2}".format(baseLocalPath, bkToUpload, dateFolder)
+                remoteFolderPath =  "{0}/{1}/{2}".format(ftphost.remoteVmFolder, bkToUpload, dateFolder)
+                logging.debug("The ftp upload from path {0} to remote path {1} will now start!".format(localFolderPath, remoteFolderPath))
+                ftphost.syncFolders(localFolderPath,remoteFolderPath)
+                logging.debug("upload to remote path {0} finished successfully".format(remoteFolderPath))
 
-def _getFilesFromFolder_(pathToBackUpFiles):
-    filesToBackUp = []
-    for file in os.listdir(pathToBackUpFiles):
-        filesToBackUp.append(file)
-    return filesToBackUp
-
-def _getBackupsFromVirtualMachineFolder_(pathToVmFolder):
-    result = {}
-    try:
-        for date in os.listdir(pathToVmFolder):
-            dateTime = datetime.strptime(date, '%Y-%m-%d-%H%M%S')
-            pathToBackUpFiles = os.path.join(pathToVmFolder, date)
-            filesToBackUp = _getFilesFromFolder_(pathToBackUpFiles)
-            result[dateTime] = filesToBackUp
-    except Exception as ex:
-        raise customExceptions.UnexpectedFolderTreeException(pathToVmFolder, ex)
-    return result
 
 
 def delete_backups_from_ftpHost(backupsToDelete, ftpHost):
@@ -143,4 +131,23 @@ def get_backups_diff(backUpSource, backUpToDiff):
                     foldersToDelete[date] =  backUpToDiff[vmName][date]
             if len(foldersToDelete) > 0 : result[vmName] = foldersToDelete
         else: result[vmName] = backUpToDiff[vmName]
+    return result
+
+
+def _getFilesFromFolder_(pathToBackUpFiles):
+    filesToBackUp = []
+    for file in os.listdir(pathToBackUpFiles):
+        filesToBackUp.append(file)
+    return filesToBackUp
+
+def _getBackupsFromVirtualMachineFolder_(pathToVmFolder):
+    result = {}
+    try:
+        for date in os.listdir(pathToVmFolder):
+            dateTime = datetime.strptime(date, '%Y-%m-%d-%H%M%S')
+            pathToBackUpFiles = os.path.join(pathToVmFolder, date)
+            filesToBackUp = _getFilesFromFolder_(pathToBackUpFiles)
+            result[dateTime] = filesToBackUp
+    except Exception as ex:
+        raise customExceptions.UnexpectedFolderTreeException(pathToVmFolder, ex)
     return result
