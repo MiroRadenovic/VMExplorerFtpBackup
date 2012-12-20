@@ -8,7 +8,6 @@ import unittest
 from mock import patch
 import backupSerializer
 import ftpHostFactory
-import config
 
 def dateFromString(date):
     return datetime.strptime(date, "%d/%m/%Y %H:%M")
@@ -258,7 +257,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                     }
                 }
                 #act
-                VMExplorerFtpBackup._upload_backups_to_ftp_server('/', localBackups)
+                VMExplorerFtpBackup._sync_backups_with_ftp_servers('/', localBackups)
 
     def testRebuild_dump_file_from_backups_on_ftphosts(self):
         '''

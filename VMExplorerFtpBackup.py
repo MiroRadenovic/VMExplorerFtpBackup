@@ -95,9 +95,11 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
     backups = get_merge_of_backups(backupsToUpload, backupsInDumpFile)
     logging.debug("the merging of the 2 backups is:\n {0}".format(backupRender.get_backups_infos(backups)))
     sort_and_remove_old_backups(backups, numberOfBackupsToKeep)
-    logging.debug("cleaned old backups (max {0} backups), the result is;\n {1}".format(numberOfBackupsToKeep, backupRender.get_backups_infos(backups)))
+    logging.debug("cleaned old backups (max {0} backups)")
+    logging.debug("the actual representation of current backup status is:\n{1}".format(numberOfBackupsToKeep, backupRender.get_backups_infos(backups)))
+    logging.debug("this program will now start the synchronization with remote ftp servers")
     try:
-        _upload_backups_to_ftp_server(vmFolderTreePath, backups)
+        _sync_backups_with_ftp_servers(vmFolderTreePath, backups)
     except Exception as ex:
         logging.error("An error occurred while syncing the backup: {0}\n trace: {1}".format(ex, traceback.format_exc()))
         raise ex
@@ -181,7 +183,7 @@ def get_only_new_backups(dictionaryOfBackups, numberOfBackupsToTake):
 #---------------------------
 
 
-def _upload_backups_to_ftp_server(vmPathBackupFolderTree, backups):
+def _sync_backups_with_ftp_servers(vmPathBackupFolderTree, backups):
     '''
     uploads backups to the ftp server defined in the config file
     args:   vmPathBackupFolderTree: str -> the base folder tree path where the backups are stored in the local filesystem
