@@ -187,7 +187,7 @@ def _upload_backups_to_ftp_server(vmPathBackupFolderTree, backups):
     args:   vmPathBackupFolderTree: str -> the base folder tree path where the backups are stored in the local filesystem
             backups: dic -> a dictionary that holds the backups that needs to be uploaded to the server
     '''
-    logging.info("Ftp sync will now start")
+    logging.info("[Ftp sync will now start]")
     for vmName in backups:
         ftphost = _get_ftpHost_by_vmName(vmName)
         logging.info("- backup's sync for virtual machine {0} with ftp server {1} begins:".format(vmName, ftphost.hostname))
@@ -257,7 +257,7 @@ def _import_ftp_config(configToImport):
         raise ImportError
 
 def _draw_welcome_banner():
-    logging.debug("########## VMExplorerFtpBackUp v.{0} #############".format(_softwareVersion))
+    logging.debug("\n\n########## VMExplorerFtpBackUp v.{0} #############".format(_softwareVersion))
     logging.debug("##################################################\n\n")
 
 
