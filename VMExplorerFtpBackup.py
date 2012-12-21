@@ -118,7 +118,6 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
         backupRender.get_backups_infos(backups)))
     logging.info("* This program will now start to synchronize the current VM backup status with the remote ftp servers."
                  " This means old backups will be deleted and new ones will be uploaded to specified ftp servers")
-    logging.info("[Ftp Sync started!]")
     try:
         _sync_backups_with_ftp_servers(vmFolderTreePath, backups)
     except Exception as ex:
@@ -214,22 +213,23 @@ def _sync_backups_with_ftp_servers(vmPathBackupFolderTree, backups):
     logging.info("[Ftp sync will now start]")
 
     # first lets delete all old backs from servers
-    logging.info("backup deletion of old backup will now start.")
+    logging.info("* first let's delete all old backups from each ftp server")
     ftpServersCleaned = []
 
     for vmName in backups:
         connectionInfo = _get_connectionInfo_by_vmName(vmName)
         if connectionInfo[0] not in ftpServersCleaned:
-            logging.debug("a check on ftp server {0} will be performed to delete old backups".format(connectionInfo[0]))
+            logging.warn("*a connection to ftp server [{0}] will be performed to see if contains old backups. " \
+                         "If old backups are found, they will be deleted".format(connectionInfo[0]))
             ftpServersCleaned.append(connectionInfo[0])
             ftphost = _get_ftpHost_by_vmName(vmName)
             backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
             if len(backupsToDelete) > 0:
-                logging.info("on server {0} there are old backups that will be deleted!".format(connectionInfo[0]))
+                logging.warn("** Ftp Server [{0}] contains old backups that will be now deleted.".format(connectionInfo[0]))
                 if _use_real_ftp_sync:
                     backupManager.delete_backups_from_ftpHost(backupsToDelete, ftphost)
             else:
-                logging.info("there are no old backups needed to be deleted on ftp server {0}".format(connectionInfo[0]))
+                logging.info("Ftp Server [{0}] does not contains old backups. No file deletions will be performed.".format(connectionInfo[0]))
 
 
     logging.info("backup upload of new backup will now start.")
