@@ -190,12 +190,32 @@ def _sync_backups_with_ftp_servers(vmPathBackupFolderTree, backups):
             backups: dic -> a dictionary that holds the backups that needs to be uploaded to the server
     '''
     logging.info("[Ftp sync will now start]")
+
+    # first lets delete all old backs from servers
+    logging.info("backup deletion of old backup will now start.")
+    ftpServersCleaned = []
+
+    for vmName in backups:
+        connectionInfo = _get_connectionInfo_by_vmName(vmName)
+        if connectionInfo[0] not in ftpServersCleaned:
+            logging.debug("a check on ftp server {0} will be performed to delete old backups".format(connectionInfo[0]))
+            ftpServersCleaned.append(connectionInfo[0])
+            ftphost = _get_ftpHost_by_vmName(vmName)
+            backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
+            if len(backupsToDelete) > 0:
+                logging.info("on server {0} there are old backups that will be deleted!".format(connectionInfo[0]))
+                backupManager.delete_backups_from_ftpHost(backupsToDelete, ftphost)
+            else:
+                logging.info("there are no old backups needed to be deleted on ftp server {0}".format(connectionInfo[0]))
+
+
+    logging.info("backup upload of new backup will now start.")
     for vmName in backups:
         ftphost = _get_ftpHost_by_vmName(vmName)
         logging.info("- backup's sync for virtual machine {0} with ftp server {1} begins:".format(vmName, ftphost.hostname))
         backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
-        if len(backupsToDelete) > 0:
-            backupManager.delete_backups_from_ftpHost(backupsToDelete, ftphost)
+        #if len(backupsToDelete) > 0:
+        #    backupManager.delete_backups_from_ftpHost(backupsToDelete, ftphost)
         if len(backupsToUpload) > 0:
             backupManager.upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree)
 
@@ -216,16 +236,22 @@ def _merge_first_backup_into_second_backup(backupToJoin, destinationBackupToJoin
                     currentDestinationMachine[dateOfBackup] = backupToJoin[vm][dateOfBackup]
         else : destinationBackupToJoin[vm] = backupToJoin[vm]
 
-def _get_ftpHost_by_vmName(vmName):
-    '''
-    by a given vmName, return associated ftpHost. mappings are located in the config.py file
-    Arg: vmName: str -> the virtual machine name.
-    '''
+
+def _get_connectionInfo_by_vmName(vmName):
     if config.VmToFtp.has_key(vmName):
         connectionInfo = config.VmToFtp[vmName]
     else:
         connectionInfo = config.VmToFtp['*']
         # connect to ftp server
+    return connectionInfo
+
+
+def _get_ftpHost_by_vmName(vmName):
+    '''
+    by a given vmName, return associated ftpHost. mappings are located in the config.py file
+    Arg: vmName: str -> the virtual machine name.
+    '''
+    connectionInfo = _get_connectionInfo_by_vmName(vmName)
     ftphost = ftpHostFactory.create_ftpHost(hostname=connectionInfo[0], port=connectionInfo[1], user=connectionInfo[2],password=connectionInfo[3], remoteFolder=connectionInfo[4])
     return ftphost
 
