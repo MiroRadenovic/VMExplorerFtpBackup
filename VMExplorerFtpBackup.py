@@ -47,6 +47,8 @@ def main(params):
     _import_ftp_config(params.configFtp)
 
     _use_real_ftp_sync = not params.simulate
+    if(_use_real_ftp_sync == False):
+        logging.warn("You have provided the -s parameter and no real action to ftp sync will be performed!")
 
     try:
         if(params.rebuildDumpFile):
@@ -104,7 +106,7 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
         logging.error("An error occurred while syncing the backup: {0}\n trace: {1}".format(ex, traceback.format_exc()))
         raise ex
 
-    logging.debug("saving Virtual Machines uploads to the the dumpfile on path: {0}".format(vmBackupHistoryDumpFilePath))
+    logging.debug("saving Virtual Machines backup status in the dumpfile on path: {0}".format(vmBackupHistoryDumpFilePath))
     if _use_real_ftp_sync:
         backupSerializer.saveBackupToDumpFile(backups, vmBackupHistoryDumpFilePath)
     logging.debug("the backups stored in the dump file are {0}".format(backupRender.get_backups_infos(backups)))
