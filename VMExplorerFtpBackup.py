@@ -53,7 +53,7 @@ def main(params):
     global _use_real_ftp_sync
     _use_real_ftp_sync = not params.simulate
     if(_use_real_ftp_sync == False):
-        logging.warn("You have provided the -s parameter and no real action to ftp sync will be performed!")
+        logging.warn("* You have provided the -s parameter and no real action to ftp sync will be performed!")
 
     try:
         if(params.rebuildDumpFile):
@@ -96,15 +96,29 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
             numberOfBackupsToKeep: int -> number of tha max backups to keep. old backups will be removed
     '''
     backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTreePath)
-    logging.debug("folder tree inspection from path {0} has found the following backups that will be uploaded \n {1}".format(vmFolderTreePath, backupRender.get_backups_infos(backupsToUpload)))
+    logging.debug("* the provided local path [{0}] contains the following backups that will be uploaded to respective" \
+                  " ftp servers: \n {1}".format(vmFolderTreePath, backupRender.get_backups_infos(backupsToUpload)))
+
     backupsInDumpFile = backupSerializer.get_backups_from_dump_file_or_None(vmBackupHistoryDumpFilePath)
-    logging.debug("current backup status is (from dumpfile {0}) \n: {1}".format(vmBackupHistoryDumpFilePath, backupRender.get_backups_infos(backupsInDumpFile)))
+
+    if (len(backupsInDumpFile) > 0):
+        logging.debug("* current dump file (from file {0}) contains: \n: {1}".format(vmBackupHistoryDumpFilePath,
+            backupRender.get_backups_infos(backupsInDumpFile)))
+
     backups = get_merge_of_backups(backupsToUpload, backupsInDumpFile)
-    logging.debug("the merging of the 2 backups is:\n {0}".format(backupRender.get_backups_infos(backups)))
+
+    #logging.debug("* the merging of the 2 backups is:\n {0}".format(backupRender.get_backups_infos(backups)))
+    logging.debug("* the merge of backups found in backup folder and those present int the dump file has finished"
+                  " successfully. The next step is to remove old backus.")
+
     sort_and_remove_old_backups(backups, numberOfBackupsToKeep)
-    logging.debug("cleaned old backups (max {0} backups)")
-    logging.debug("the actual representation of current backup status is:\n{1}".format(numberOfBackupsToKeep, backupRender.get_backups_infos(backups)))
-    logging.debug("this program will now start the synchronization with remote ftp servers")
+
+    logging.debug("* removing of old backups (max {0} backups) has finished.".format(numberOfBackupsToKeep))
+    logging.info("* the actual representation of current backup status is:\n{1}".format(numberOfBackupsToKeep,
+        backupRender.get_backups_infos(backups)))
+    logging.info("* This program will now start to synchronize the current VM backup status with the remote ftp servers."
+                 " This means old backups will be deleted and new ones will be uploaded to specified ftp servers")
+    logging.info("[Ftp Sync started!]")
     try:
         _sync_backups_with_ftp_servers(vmFolderTreePath, backups)
     except Exception as ex:
