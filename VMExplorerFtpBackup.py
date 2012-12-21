@@ -215,12 +215,12 @@ def deleted_old_backups_from_ftp_servers(backups):
     for vmName in backups:
         connectionInfo = _get_connectionInfo_by_vmName(vmName)
         if connectionInfo[0] not in ftpServersCleaned:
-            logging.warn("*a connection to ftp server [{0}] will be performed to see if contains old backups. "\
+            logging.warn("* a connection to ftp server [{0}] will be performed to see if contains old backups. "\
                          "If old backups are found, they will be deleted".format(connectionInfo[0]))
             ftpServersCleaned.append(connectionInfo[0])
             ftphost = _get_ftpHost_by_vmName(vmName)
 
-            backupsOnRemoteFtpServer =  backupManager.getBackupsFromFtpServer(ftpHost)
+            backupsOnRemoteFtpServer =  backupManager.getBackupsFromFtpServer(ftphost)
             logging.debug("** Ftp Server [{0}] stores the following backups: {0}".format(connectionInfo[0],
                 backupRender.get_backups_infos(backupsOnRemoteFtpServer)))
 
