@@ -288,13 +288,18 @@ def _configure_logger(verbosity):
 
 
 def _import_ftp_config(configToImport):
-    logging.debug('the ftp connection config file that will be used is {0}'.format(configToImport))
+    logging.info('* the ftp connection config file that will be used is [{0}.py]'.format(configToImport))
     try:
         global config
         config = __import__(configToImport, globals(), locals(), [], -1)
-        logging.debug("the following machines have a defined ftp connection in the config file")
+        logging.debug("\tthe following VM have a defined ftp connection in the provided config file")
         for machineName in config.VmToFtp:
-            logging.debug('- ' + machineName)
+            if machineName != '*':
+                logging.debug('\t- ' + machineName)
+        if config.VmToFtp['*'] != None:
+            logging.debug("\tall VM that don't have a specific ftp connection, will use the default connection to server: {0}".format(config.VmToFtp['*'][0]))
+        else: logging.warn("\tthere is no default connection defined in the provided configuration file. a good idea is to specify a connection for [*]..")
+
     except ImportError:
         logging.error("Cannot import configuration {0}. ".format(configToImport))
         raise ImportError
