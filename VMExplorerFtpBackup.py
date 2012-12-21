@@ -206,7 +206,7 @@ def sync_backups_with_ftp_servers(vmPathBackupFolderTree, backups):
     # first lets delete all old backs from servers
     logging.info("* first let's delete all old backups from each ftp server")
     deleted_old_backups_from_ftp_servers(backups)
-    logging.info("* no more backup deletion is required. Let's start the backup upload")
+    logging.info("*All backup deletion has finished. Let's start now the backup upload")
     upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree)
     logging.info("syncing to ftp has finished successfully")
 
