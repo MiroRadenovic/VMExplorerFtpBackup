@@ -31,11 +31,11 @@ from subprocess import Popen
 import traceback
 
 config = None
-
 _softwareVersion = 0.1
 
 # program start
 
+_use_real_ftp_sync = True
 
 
 
@@ -46,7 +46,7 @@ def main(params):
     _draw_welcome_banner()
     _import_ftp_config(params.configFtp)
 
-
+    _use_real_ftp_sync = not params.simulate
 
     try:
         if(params.rebuildDumpFile):
@@ -105,7 +105,8 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
         raise ex
 
     logging.debug("saving Virtual Machines uploads to the the dumpfile on path: {0}".format(vmBackupHistoryDumpFilePath))
-    backupSerializer.saveBackupToDumpFile(backups, vmBackupHistoryDumpFilePath)
+    if _use_real_ftp_sync:
+        backupSerializer.saveBackupToDumpFile(backups, vmBackupHistoryDumpFilePath)
     logging.debug("the backups stored in the dump file are {0}".format(backupRender.get_backups_infos(backups)))
 
 
@@ -204,7 +205,8 @@ def _sync_backups_with_ftp_servers(vmPathBackupFolderTree, backups):
             backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
             if len(backupsToDelete) > 0:
                 logging.info("on server {0} there are old backups that will be deleted!".format(connectionInfo[0]))
-                backupManager.delete_backups_from_ftpHost(backupsToDelete, ftphost)
+                if _use_real_ftp_sync:
+                    backupManager.delete_backups_from_ftpHost(backupsToDelete, ftphost)
             else:
                 logging.info("there are no old backups needed to be deleted on ftp server {0}".format(connectionInfo[0]))
 
@@ -217,7 +219,8 @@ def _sync_backups_with_ftp_servers(vmPathBackupFolderTree, backups):
         #if len(backupsToDelete) > 0:
         #    backupManager.delete_backups_from_ftpHost(backupsToDelete, ftphost)
         if len(backupsToUpload) > 0:
-            backupManager.upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree)
+            if _use_real_ftp_sync:
+                backupManager.upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree)
 
     logging.info("syncing to ftp has finished successfully")
 
@@ -310,6 +313,7 @@ if __name__ == "__main__":
     parser.add_option('-z', '--status', help='displays the status of the backups: info related to the next upload and the current dump file', dest='status', action="store_true", default=False)
     parser.add_option('-v', '--verbose', help='set the verbosity level. accepted values are: info, warn, error and debug', dest='verbosity', default='info')
     parser.add_option('-x', '--execute', help='runs a program if no errors occurs after the backup sync has performed', dest='execute')
+    parser.add_option('-S', '--simulate', help='simulate the program execution: no ftp deletion or upload will be performed and no overwrite is done to the dump file', dest='simulate',  action="store_true", default=False)
 
     (opts, args) = parser.parse_args()
     main(opts)
