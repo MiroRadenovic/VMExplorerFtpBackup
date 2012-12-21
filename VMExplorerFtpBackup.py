@@ -119,7 +119,7 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
     logging.info("* This program will now start to synchronize the current VM backup status with the remote ftp servers."
                  " This means old backups will be deleted and new ones will be uploaded to specified ftp servers")
     try:
-        _sync_backups_with_ftp_servers(vmFolderTreePath, backups)
+        sync_backups_with_ftp_servers(vmFolderTreePath, backups)
     except Exception as ex:
         logging.error("An error occurred while syncing the backup: {0}\n trace: {1}".format(ex, traceback.format_exc()))
         raise ex
@@ -196,55 +196,57 @@ def get_only_new_backups(dictionaryOfBackups, numberOfBackupsToTake):
         result[key] = dictionaryOfBackups[key]
     return result
 
-
-
-
-#---------------------------
-#     private methods
-#---------------------------
-
-
-def _sync_backups_with_ftp_servers(vmPathBackupFolderTree, backups):
+def sync_backups_with_ftp_servers(vmPathBackupFolderTree, backups):
     '''
     uploads backups to the ftp server defined in the config file
     args:   vmPathBackupFolderTree: str -> the base folder tree path where the backups are stored in the local filesystem
-            backups: dic -> a dictionary that holds the backups that needs to be uploaded to the server
+            backups: dic -> a dictionary that holds the backups as wanted to be sync with remote ftp servers
     '''
     logging.info("[Ftp sync will now start]")
-
     # first lets delete all old backs from servers
     logging.info("* first let's delete all old backups from each ftp server")
-    ftpServersCleaned = []
+    deleted_old_backups_from_ftp_servers(backups)
+    logging.info("* no more backup deletion is required. Let's start the backup upload")
+    upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree)
+    logging.info("syncing to ftp has finished successfully")
 
+def deleted_old_backups_from_ftp_servers(backups):
+    ftpServersCleaned = []
     for vmName in backups:
         connectionInfo = _get_connectionInfo_by_vmName(vmName)
         if connectionInfo[0] not in ftpServersCleaned:
-            logging.warn("*a connection to ftp server [{0}] will be performed to see if contains old backups. " \
+            logging.warn("*a connection to ftp server [{0}] will be performed to see if contains old backups. "\
                          "If old backups are found, they will be deleted".format(connectionInfo[0]))
             ftpServersCleaned.append(connectionInfo[0])
             ftphost = _get_ftpHost_by_vmName(vmName)
             backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
             if len(backupsToDelete) > 0:
-                logging.warn("** Ftp Server [{0}] contains {1} old backups that will be now deleted.".format(connectionInfo[0], len(backupsToDelete)))
-                logging.debug("** this are the backups that will be deleted:\n{0}".format(backupRender.get_backups_infos(backupsToDelete)))
+                logging.warn(
+                    "** Ftp Server [{0}] contains {1} old backups that will be now deleted.".format(connectionInfo[0],
+                        len(backupsToDelete)))
+                logging.debug("** this are the backups that will be deleted:\n{0}".format(
+                    backupRender.get_backups_infos(backupsToDelete)))
                 if _use_real_ftp_sync:
                     backupManager.delete_backups_from_ftpHost(backupsToDelete, ftphost)
             else:
-                logging.info("Ftp Server [{0}] does not contains old backups. No file deletions will be performed.".format(connectionInfo[0]))
+                logging.info(
+                    "Ftp Server [{0}] does not contains old backups. No file deletions will be performed.".format(
+                        connectionInfo[0]))
 
-
-    logging.info("backup upload of new backup will now start.")
+def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
     for vmName in backups:
         ftphost = _get_ftpHost_by_vmName(vmName)
-        logging.info("- backup's sync for virtual machine {0} with ftp server {1} begins:".format(vmName, ftphost.hostname))
+        logging.info(
+            "- backup's sync for virtual machine {0} with ftp server {1} begins:".format(vmName, ftphost.hostname))
         backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
-        #if len(backupsToDelete) > 0:
-        #    backupManager.delete_backups_from_ftpHost(backupsToDelete, ftphost)
         if len(backupsToUpload) > 0:
             if _use_real_ftp_sync:
                 backupManager.upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree)
 
-    logging.info("syncing to ftp has finished successfully")
+
+#---------------------------
+#     private methods
+#---------------------------
 
 
 def _merge_first_backup_into_second_backup(backupToJoin, destinationBackupToJoin):

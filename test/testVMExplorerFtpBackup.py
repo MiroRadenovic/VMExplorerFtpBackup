@@ -257,7 +257,7 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                     }
                 }
                 #act
-                VMExplorerFtpBackup._sync_backups_with_ftp_servers('/', localBackups)
+                VMExplorerFtpBackup.sync_backups_with_ftp_servers('/', localBackups)
 
     def testRebuild_dump_file_from_backups_on_ftphosts(self):
         '''
