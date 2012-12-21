@@ -225,7 +225,8 @@ def _sync_backups_with_ftp_servers(vmPathBackupFolderTree, backups):
             ftphost = _get_ftpHost_by_vmName(vmName)
             backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
             if len(backupsToDelete) > 0:
-                logging.warn("** Ftp Server [{0}] contains old backups that will be now deleted.".format(connectionInfo[0]))
+                logging.warn("** Ftp Server [{0}] contains {1} old backups that will be now deleted.".format(connectionInfo[0], len(backupsToDelete)))
+                logging.debug("** this are the backups that will be deleted:\n{0}".format(backupRender.get_backups_infos(backupsToDelete)))
                 if _use_real_ftp_sync:
                     backupManager.delete_backups_from_ftpHost(backupsToDelete, ftphost)
             else:

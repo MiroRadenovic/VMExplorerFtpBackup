@@ -52,13 +52,13 @@ def try_load_dumpfile(pathToDumpFile):
     try:
         return  open(pathToDumpFile, 'r')
     except IOError:
-        log.warn("cannot locate {filePath}! this means that a new dumpfile will be recreated. Are you sure that you have provided the correct dumpfile?.  Be aware that this means that all backups " \
+        log.critical("cannot locate {filePath}! this means that a new dumpfile will be recreated. Are you sure that you have provided the correct dumpfile?.  Be aware that this means that all backups " \
                  " located on ftp servers will be deleted! If you don't want to delete all your backups on remote ftp servers, "\
                  "exit the program and re-run it by providing parameter '-r' or '--rebuildDumpFile' to recreate the dumpfile. ".format(filePath=pathToDumpFile))
-        log.warn("* Press [C] to continue\n* Press and key to quit")
+        log.critical("* Press [C] to continue\n* Press and key to quit")
         userInput = raw_input()
     if userInput.lower() != 'c':
-        log.warn("ok, quitting.. bye!")
+        log.info("ok, quitting.. bye!")
         sys.exit(0)
     else:
         return None
