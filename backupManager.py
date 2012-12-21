@@ -100,8 +100,8 @@ def get_backups_for_upload_and_delete(backups, ftpHost):
     return the backups that need to be deleted and upload from/to the ftp server
     '''
     backupsOnServer = getBackupsFromFtpServer(ftpHost)
-    logging.debug("ftp server {0} has already the following backups:\n {1}".format(ftpHost.hostname,
-        backupRender.get_backups_infos(backupsOnServer)))
+    #logging.debug("ftp server {0} has already the following backups:\n {1}".format(ftpHost.hostname,
+    #    backupRender.get_backups_infos(backupsOnServer)))
     backupsToDelete = get_backups_diff(backups, backupsOnServer)
     #if len(backupsToDelete) > 0:
     #    logging.info("the following files will be deleted: \n {0}".format(backupRender.get_backups_infos(backupsToDelete)))
