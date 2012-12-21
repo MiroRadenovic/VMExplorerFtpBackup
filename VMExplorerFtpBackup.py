@@ -300,8 +300,8 @@ def _import_ftp_config(configToImport):
         raise ImportError
 
 def _draw_welcome_banner():
-    logging.debug("\n\n########## VMExplorerFtpBackUp v.{0} #############".format(_softwareVersion))
-    logging.debug("##################################################\n\n")
+    logging.info("\n\n########## VMExplorerFtpBackUp v.{0} #############".format(_softwareVersion))
+    logging.info("##################################################\n")
 
 
 
