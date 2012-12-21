@@ -46,6 +46,7 @@ def main(params):
     _draw_welcome_banner()
     _import_ftp_config(params.configFtp)
 
+    global _use_real_ftp_sync
     _use_real_ftp_sync = not params.simulate
     if(_use_real_ftp_sync == False):
         logging.warn("You have provided the -s parameter and no real action to ftp sync will be performed!")
