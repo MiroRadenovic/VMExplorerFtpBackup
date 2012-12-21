@@ -221,7 +221,7 @@ def deleted_old_backups_from_ftp_servers(backups):
             ftphost = _get_ftpHost_by_vmName(vmName)
 
             backupsOnRemoteFtpServer =  backupManager.getBackupsFromFtpServer(ftphost)
-            logging.debug("** Ftp Server [{0}] stores the following backups: {0}".format(connectionInfo[0],
+            logging.debug("** Ftp Server [{0}] stores the following backups: \n{1}".format(connectionInfo[0],
                 backupRender.get_backups_infos(backupsOnRemoteFtpServer)))
 
             backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
