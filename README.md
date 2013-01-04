@@ -15,6 +15,7 @@ this file contains all the information of previous backup ftp uploads to allows 
 * VMExplorerFtpBackup.py learns which old backups needs to be deleted from ftp servers and which new backups needs to be uploaded.
 * VMExplorerFtpBackup.py deletes and uploads required files
 * VMExplorerFtpBackup.py updates the local backup database called dumpfile.dm
+* run a command to delete the local path that contains virtual machines backups (you can use the -x option)
 
 HOW TO SETUP VMExplorer
 ----
