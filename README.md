@@ -1,12 +1,42 @@
-VMExplorerFtpBackup
+VMExplorerFtpBackup.py
 ===================
 
-A backup helper for VMExplorer that uploads virtual machines backups to a FTP server
+A backup helper for VMExplorer that uploads virtual machines backups to a FTP server.
+Currently i have bought a licence of VMExplorer to be able to backup my virtual machines running into esxi 5.1 servers.
+Unfortunately VMExplorer does not allow to store virtual machines backups over ftp server and to solve this problem, i' ve created this small program writen in python 2.6 to handle the rotating backups using ftp servers.
+
+HOW IT WORKS
+=====
+the process is easy:
+* VMExplorer will perform all the virtual machine backups and store them to a local path ex: c:\VirtualMachinesTemp
+* once VMExplorer has finished the job, VMExplorerFtpBackup.py will start
+* VMExplorerFtpBackup.py scans the local path where virtual machines backups are located and will create/update a backup database called dumpfile.dm
+ dumpfile contains all the information of previous backup ftp uploads to allows backup' s rotation.
+* VMExplorerFtpBackup.py understands which old backups needs to be deleted from ftp servers and which new backups needs to be uploaded.
+* VMExplorerFtpBackup.py deletes and uploads required files
+* VMExplorerFtpBackup.py updates the local backup database called dumpfile.dm
+
+HOW TO SETUP VMExplorer
+----
+just sets that all backups will be saved into a directory using the followin pattern: C:\VirtualMachinesBackUps\{VM}\{DATETIME}
+
+HOW TO SETUP VMExplorerFtpBackup.py
+----
+edit config.py and sets your ftp hosts connection properties as: hostname, port, username, password  and the remote folder name.
+
+HOW TO START THE PROGRAM
+----
+run  VMExplorerFtpBackup.py -h to see all available options.
+
+Notes
+----
+VMExplorerFtpBackup.py relies on ftputil 2.7.1 (http://ftputil.sschwarzer.net/trac) which is included into this repository.
+a small fix has been applied to _init_.py in line 194. if the fix works, a bug will be reported upstreams. In the meantime i'm testing the fix.
 
 TESTS
 =====
 
-Deps
+Deps for running unit testing
 ----
 Only for testing purpose, VMExplorerFtpBackup has some dependency to an external libraries:
   * [mock] : http://www.voidspace.org.uk/python/mock. You don't need [mock] to run the program.
