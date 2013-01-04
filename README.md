@@ -10,9 +10,9 @@ HOW IT WORKS
 the process is easy:
 * VMExplorer will perform all the virtual machine backups and store them to a local path ex: c:\VirtualMachinesTemp
 * once VMExplorer has finished the job, VMExplorerFtpBackup.py will start
-* VMExplorerFtpBackup.py scans the local path where virtual machines backups are located and will create/update a backup database called dumpfile.dm
- dumpfile contains all the information of previous backup ftp uploads to allows backup' s rotation.
-* VMExplorerFtpBackup.py understands which old backups needs to be deleted from ftp servers and which new backups needs to be uploaded.
+* VMExplorerFtpBackup.py scans the local path where virtual machines backups are located and will create/update a backup database called dumpfile.dm.
+this file contains all the information of previous backup ftp uploads to allows backup' s rotation.
+* VMExplorerFtpBackup.py learns which old backups needs to be deleted from ftp servers and which new backups needs to be uploaded.
 * VMExplorerFtpBackup.py deletes and uploads required files
 * VMExplorerFtpBackup.py updates the local backup database called dumpfile.dm
 
