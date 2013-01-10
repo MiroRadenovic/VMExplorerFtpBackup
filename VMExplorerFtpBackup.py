@@ -97,7 +97,7 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
     '''
     backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTreePath)
     if len(backupsToUpload) == 0:
-        logging.warn("No new backups are found in folder {0} . there is no need to continue! exiting....".format(vmFolderTreePath))ù
+        logging.warn("No new backups are found in folder {0} . there is no need to continue! exiting....".format(vmFolderTreePath))
         import sys
         sys.exit()
 
