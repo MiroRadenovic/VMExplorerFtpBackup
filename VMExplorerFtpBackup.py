@@ -97,7 +97,9 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
     '''
     backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTreePath)
     if len(backupsToUpload) == 0:
-        logging.warn("No new backups are found in folder {0} . there is no need to continue! exiting....".format(vmFolderTreePath))
+        logging.warn("No new backups are found in folder {0} . there is no need to continue! exiting....".format(vmFolderTreePath))ù
+        import sys
+        sys.exit()
 
     logging.debug("* the provided local path [{0}] contains the following backups that will be uploaded to respective" \
                   " ftp servers: \n {1}".format(vmFolderTreePath, backupRender.get_backups_infos(backupsToUpload)))
