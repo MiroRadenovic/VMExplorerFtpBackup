@@ -42,7 +42,7 @@ def get_backups_from_dump_file_or_None(pathToDumpFile='backupDb.dump'):
             dumpfile.close()
             return result
         except Exception as ex:
-            log.error("An invalid dunpfile has been provider at path {path}. Please make sure the dumpfile is a valid vm database. error is {error}.\n Quitting..".format(path=pathToDumpFile,error=ex.message))
+            log.error("An invalid dumpfile has been provider at path {path}. Please make sure the dumpfile is a valid vm database. error is {error}.\n Quitting..".format(path=pathToDumpFile,error=ex.message))
             sys.exit(0)
 
     else: return []
