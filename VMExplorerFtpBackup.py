@@ -140,6 +140,7 @@ def _rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
         if not vmName == '*':
             host = _get_ftpHost_by_vmName(vmName)
             backupsInFtpHost = backupManager.getBackupsFromFtpServer(host)
+            host.close()
             _merge_first_backup_into_second_backup(backupsInFtpHost, backups)
     backupRender.get_backups_infos(backups)
     backupSerializer.saveBackupToDumpFile(backups, dumpFilePath)
@@ -237,6 +238,7 @@ def deleted_old_backups_from_ftp_servers(backups):
                 logging.info(
                     "Ftp Server [{0}] does not contains old backups. No file deletions will be performed.".format(
                         connectionInfo[0]))
+            ftphost.close()
 
 def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
     for vmName in backups:
@@ -246,7 +248,7 @@ def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
         if len(backupsToUpload) > 0:
             if _use_real_ftp_sync:
                 backupManager.upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree)
-
+        ftphost.close()
 
 #---------------------------
 #     private methods

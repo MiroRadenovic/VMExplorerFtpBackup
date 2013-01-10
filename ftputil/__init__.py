@@ -192,8 +192,8 @@ class FTPHost(object):
                 # Timed-out sessions raise `error_temp`.
                 except ftplib.error_temp:
                     continue
-                except EOFError:
-                    continue
+                #except EOFError:
+                #    continue
                 else:
                     # Everything's ok; use this `FTPHost` instance.
                     return host
