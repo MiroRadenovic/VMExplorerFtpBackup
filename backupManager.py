@@ -77,7 +77,8 @@ def upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFold
             for dateBackup in backupsToUpload[bkToUpload]:
                 # format datetime as 2000-08-28-154138
                 dateFolder = dateBackup.strftime("%Y-%m-%d-%H%M%S")
-                localFolderPath = "{0}/{1}/{2}".format(baseLocalPath, bkToUpload, dateFolder)
+                localFolderPath = os.path.join(baseLocalPath, bkToUpload, dateFolder)
+                #localFolderPath = "{0}/{1}/{2}".format(baseLocalPath, bkToUpload, dateFolder)
                 remoteFolderPath =  "{0}/{1}/{2}".format(ftphost.remoteVmFolder, bkToUpload, dateFolder)
                 logging.debug("The ftp upload from path {0} to remote path {1} will now start!".format(localFolderPath, remoteFolderPath))
                 #ftphost.syncFolders(localFolderPath,remoteFolderPath)
