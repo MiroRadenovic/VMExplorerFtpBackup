@@ -84,7 +84,8 @@ def upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFold
                 ftphost.ensure_remote_folder_path(remoteFolderPath)
                 # chiudo....
                 ftphost.close()
-                ftphost.upload_using_ncftpput(localFolderPath,remoteFolderPath)
+                #ftphost.upload_using_ncftpput(localFolderPath,remoteFolderPath)
+                ftphost.upload_using_curl(localFolderPath,remoteFolderPath)
                 logging.debug("upload to remote path {0} finished successfully".format(remoteFolderPath))
 
 
