@@ -25,6 +25,7 @@ import ftplib
 import ftputil
 from ftputil import ftp_sync
 from subprocess import Popen
+import logging
 
 class FtpSession(ftplib.FTP):
     def __init__(self, host, userid, password, port):
@@ -51,12 +52,13 @@ def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, re
 
     # http://countergram.com/adding-bound-methods
     result.syncFolders =  types.MethodType(upload_using_ncftpput, result, result.__class__)
+    #result.syncFolders =  types.MethodType(sync, result, result.__class__)
     return result
 
 def sync(self, source_directory, target_directory):
     def ensure_remote_folder_exist(ftpHost, remoteFolder):
         try:
-            ftpHost.listdir(currentFolder)
+            ftpHost.listdir(remoteFolder)
         except Exception:
             ftpHost.makedirs(remoteFolder)
 
