@@ -51,8 +51,8 @@ def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, re
         result.remoteVmFolder = '/'
 
     # http://countergram.com/adding-bound-methods
-    result.syncFolders =  types.MethodType(upload_using_ncftpput, result, result.__class__)
-    #result.syncFolders =  types.MethodType(sync, result, result.__class__)
+    #result.syncFolders =  types.MethodType(upload_using_ncftpput, result, result.__class__)
+    result.syncFolders =  types.MethodType(sync, result, result.__class__)
     return result
 
 def sync(self, source_directory, target_directory):
