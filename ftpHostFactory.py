@@ -55,6 +55,7 @@ def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, re
     #result.syncFolders =  types.MethodType(sync, result, result.__class__)
     result.ensure_remote_folder_path =  types.MethodType(ensure_remote_folder_exist, result, result.__class__)
     result.upload_using_ncftpput = types.MethodType(upload_using_ncftpput, result, result.__class__)
+    result.upload_using_curl = types.MethodType(upload_using_curl, result, result.__class__)
     return result
 
 
