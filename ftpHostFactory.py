@@ -52,8 +52,18 @@ def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, re
 
     # http://countergram.com/adding-bound-methods
     #result.syncFolders =  types.MethodType(upload_using_ncftpput, result, result.__class__)
-    result.syncFolders =  types.MethodType(sync, result, result.__class__)
+    #result.syncFolders =  types.MethodType(sync, result, result.__class__)
+    result.ensure_remote_folder_path =  types.MethodType(ensure_remote_folder_exist, result, result.__class__)
+    result.upload_using_ncftpput = types.MethodType(upload_using_ncftpput, result, result.__class__)
     return result
+
+
+def ensure_remote_folder_exist(ftpHost, remoteFolder):
+    try:
+        ftpHost.listdir(remoteFolder)
+    except Exception:
+        ftpHost.makedirs(remoteFolder)
+
 
 def sync(self, source_directory, target_directory):
     def ensure_remote_folder_exist(ftpHost, remoteFolder):

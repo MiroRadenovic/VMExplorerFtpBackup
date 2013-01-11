@@ -80,7 +80,11 @@ def upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFold
                 localFolderPath = "{0}/{1}/{2}".format(baseLocalPath, bkToUpload, dateFolder)
                 remoteFolderPath =  "{0}/{1}/{2}".format(ftphost.remoteVmFolder, bkToUpload, dateFolder)
                 logging.debug("The ftp upload from path {0} to remote path {1} will now start!".format(localFolderPath, remoteFolderPath))
-                ftphost.syncFolders(localFolderPath,remoteFolderPath)
+                #ftphost.syncFolders(localFolderPath,remoteFolderPath)
+                ftphost.ensure_remote_folder_path(remoteFolderPath)
+                # chiudo....
+                ftphost.close()
+                ftphost.upload_using_ncftpput(localFolderPath,remoteFolderPath)
                 logging.debug("upload to remote path {0} finished successfully".format(remoteFolderPath))
 
 

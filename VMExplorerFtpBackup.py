@@ -253,7 +253,7 @@ def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
         if len(backupsToUpload) > 0:
             if _use_real_ftp_sync:
                 backupManager.upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree)
-        ftphost.close()
+#        ftphost.close()
 
 #---------------------------
 #     private methods
