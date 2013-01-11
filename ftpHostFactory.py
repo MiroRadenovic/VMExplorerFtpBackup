@@ -92,6 +92,7 @@ def upload_using_ncftpput(self, source_directory, target_directory):
         logging.error(ex)
 
 def upload_using_curl(self, source_directory, target_directory):
+    logging.warn("Curl upload!")
     import os
     filesToUpload = os.listdir(source_directory)
     for file in filesToUpload:
