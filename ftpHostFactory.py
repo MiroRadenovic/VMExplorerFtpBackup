@@ -68,6 +68,8 @@ def sync(self, source_directory, target_directory):
 def upload_using_ncftpput(self, source_directory, target_directory):
     try:
         #ncftpput [flags] remote-host remote-dir local-files...
+
+        #df
         p = Popen("ncftpput -R -u {user} -p {password} -P {port} {host} {remotedir} {localfiles}".format(
             user=self.user, password=self.password, port=self.port, host= self.host,
             remotedir=target_directory, localfiles=source_directory ))
