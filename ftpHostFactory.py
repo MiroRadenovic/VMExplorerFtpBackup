@@ -24,6 +24,7 @@ import types
 import ftplib
 import ftputil
 from ftputil import ftp_sync
+from subprocess import Popen
 
 class FtpSession(ftplib.FTP):
     def __init__(self, host, userid, password, port):
@@ -36,6 +37,11 @@ class FtpSession(ftplib.FTP):
 def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, remoteFolder=None):
     result =  ftputil.FTPHost(hostname, user, password, port=port, session_factory=FtpSession)
     result.hostname = hostname
+    result.user = user
+    result.password = password
+    result.port = port
+    result.remoteFolder = remoteFolder
+
 
     if remoteFolder != None:
         result.remoteVmFolder = remoteFolder
@@ -44,7 +50,7 @@ def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, re
         result.remoteVmFolder = '/'
 
     # http://countergram.com/adding-bound-methods
-    result.syncFolders =  types.MethodType(sync, result, result.__class__)
+    result.syncFolders =  types.MethodType(upload_using_ncftpput, result, result.__class__)
     return result
 
 def sync(self, source_directory, target_directory):
@@ -58,6 +64,18 @@ def sync(self, source_directory, target_directory):
     source = ftp_sync.LocalHost()
     syncer = ftp_sync.Syncer(source, self)
     syncer.sync(source_directory, target_directory)
+
+def upload_using_ncftpput(self, source_directory, target_directory):
+    try:
+        #ncftpput [flags] remote-host remote-dir local-files...
+        p = Popen("ncftpput -R -u {user} -p {password} -P {port} {host} {remotedir} {localfiles}".format(
+            user=self.user, password=self.password, port=self.port, host= self.host,
+            remotedir=target_directory, localfiles=source_directory ))
+        stdout, stderr = p.communicate()
+        logging.debug(stdout)
+    except Exception as ex:
+        logging.error(ex)
+
 
 
 
