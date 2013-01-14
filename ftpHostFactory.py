@@ -61,8 +61,8 @@ class FtpWrapper():
             self._ftplib.makedirs(remoteFolder)
 
     def listdir(self,path):
-        if path.endswith('/'):
-            return self._ftplib.listdir(path[:-1])
+       # if path.endswith('/'):
+       #     return self._ftplib.listdir(path[:-1])
         return self._ftplib.listdir(path)
 
     def curdir(self):
