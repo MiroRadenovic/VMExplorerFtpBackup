@@ -44,24 +44,26 @@ def getBackupsFromFolderTree(pathToFolder):
         logging.error("An error occurred using the provided local path {0} for building the VM backup tree. Are you sure you have "
                       "specified the correct path where your vm backs are stored? are you using the correct folder name patter for dates?")
 
-def getBackupsFromFtpServer(ftpHost):
+def getBackupsFromFtpServer(ftpWrapper):
     # this is a dirty bug fix. the listdir cmd need to be executed twice to return the correct value,
+    ftpWrapper.connect_to_host()
     ftplist = None
     try:
-        ftplist = ftpHost.listdir('.')
+        ftplist = ftpWrapper.listdir('.')
     except Exception:
-        ftplist = ftpHost.listdir('.')
+        ftplist = ftpWrapper.listdir('.')
 
     result = {}
-    names = ftpHost.listdir(ftpHost.curdir)
+    names = ftpWrapper.listdir(ftpWrapper.curdir)
     for serverName in names:
-        backupDates = ftpHost.listdir(serverName)
+        backupDates = ftpWrapper.listdir(serverName)
         backupsInServer = {}
         for date in backupDates:
             currentDate = datetime.strptime(date, '%Y-%m-%d-%H%M%S')
-            files = ftpHost.listdir(serverName + '/' + date)
+            files = ftpWrapper.listdir(serverName + '/' + date)
             backupsInServer[currentDate] = files
         result[serverName] = backupsInServer
+    ftpWrapper.disconnect_from_host()
     return result
 
 def upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree, uploadMethod='curl'):

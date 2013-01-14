@@ -56,6 +56,10 @@ class FtpWrapper():
         except Exception:
             self._ftplib.makedirs(remoteFolder)
 
+    def listdir(self,path):
+        return self._ftplib.listdir(path)
+
+
     def sync(self, source_directory, target_directory):
 
         def ensure_remote_folder_exist(ftpHost, remoteFolder):
