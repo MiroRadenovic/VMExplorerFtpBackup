@@ -56,7 +56,10 @@ def getBackupsFromFtpServer(ftpWrapper):
         logging.warn("2-" + str(ftplist))
 
     result = {}
-    names = ftpWrapper.listdir(ftpWrapper.curdir)
+    #names = ftpWrapper.listdir(ftpWrapper.curdir)
+    names = ftpWrapper.listdir('/VirtualMachinesBackUps')
+    logging.warn("3-" + str(ftpWrapper.curdir))
+
     for serverName in names:
         backupDates = ftpWrapper.listdir(serverName)
         backupsInServer = {}
