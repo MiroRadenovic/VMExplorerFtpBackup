@@ -50,10 +50,10 @@ def getBackupsFromFtpServer(ftpWrapper):
     ftplist = None
     try:
         ftplist = ftpWrapper.listdir('.')
-        logging.warn("1-" + ftplist)
+        logging.warn("1-" + str(ftplist))
     except Exception:
         ftplist = ftpWrapper.listdir('.')
-        logging.warn("2-" + ftplist)
+        logging.warn("2-" + str(ftplist))
 
     result = {}
     names = ftpWrapper.listdir(ftpWrapper.curdir)
