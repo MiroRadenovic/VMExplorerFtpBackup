@@ -31,8 +31,10 @@ class FtpSession(ftplib.FTP):
     def __init__(self, host, userid, password, port):
         """Act like ftplib.FTP's constructor but connect to another port."""
         ftplib.FTP.__init__(self)
-        self.connect(host, port)
-        self.login(userid, password)
+        #self.connect(host, port)
+        #self.login(userid, password)
+
+
 
 
 def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, remoteFolder=None):
@@ -51,12 +53,22 @@ def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, re
         result.remoteVmFolder = '/'
 
     # http://countergram.com/adding-bound-methods
-    #result.syncFolders =  types.MethodType(upload_using_ncftpput, result, result.__class__)
-    #result.syncFolders =  types.MethodType(sync, result, result.__class__)
+    result.connect_to_host =  types.MethodType(connect_to_host, result, result.__class__)
+    result.disconnect_from_host =  types.MethodType(disconnect_from_host, result, result.__class__)
+
     result.ensure_remote_folder_path =  types.MethodType(ensure_remote_folder_exist, result, result.__class__)
     result.upload_using_ncftpput = types.MethodType(upload_using_ncftpput, result, result.__class__)
     result.upload_using_curl = types.MethodType(upload_using_curl, result, result.__class__)
+    result.upload_using_ftputil = types.MethodType(sync, result, result.__class__)
     return result
+
+
+def connect_to_host(self):
+    self.connect(host, port)
+    self.login(userid, password)
+
+def disconnect_from_host(self):
+    self.close()
 
 
 def ensure_remote_folder_exist(ftpHost, remoteFolder):

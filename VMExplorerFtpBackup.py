@@ -144,8 +144,10 @@ def _rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
     for vmName in config.VmToFtp:
         if not vmName == '*':
             host = _get_ftpHost_by_vmName(vmName)
+            host.connect_to_host()
             backupsInFtpHost = backupManager.getBackupsFromFtpServer(host)
-            host.close()
+            #host.close()
+            host.disconnect_from_host()
             _merge_first_backup_into_second_backup(backupsInFtpHost, backups)
     backupRender.get_backups_infos(backups)
     backupSerializer.saveBackupToDumpFile(backups, dumpFilePath)
@@ -225,6 +227,7 @@ def deleted_old_backups_from_ftp_servers(backups):
                          "If old backups are found, they will be deleted".format(connectionInfo[0]))
             ftpServersCleaned.append(connectionInfo[0])
             ftphost = _get_ftpHost_by_vmName(vmName)
+            ftphost.connect_to_host()
 
             backupsOnRemoteFtpServer =  backupManager.getBackupsFromFtpServer(ftphost)
             logging.debug("** Ftp Server [{0}] stores the following backups: \n{1}".format(connectionInfo[0],
@@ -243,7 +246,8 @@ def deleted_old_backups_from_ftp_servers(backups):
                 logging.info(
                     "Ftp Server [{0}] does not contains old backups. No file deletions will be performed.".format(
                         connectionInfo[0]))
-            ftphost.close()
+            #ftphost.close()
+            ftphost.disconnect_from_host()
 
 def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
     for vmName in backups:

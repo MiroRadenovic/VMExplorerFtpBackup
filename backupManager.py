@@ -64,7 +64,7 @@ def getBackupsFromFtpServer(ftpHost):
         result[serverName] = backupsInServer
     return result
 
-def upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree):
+def upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree, uploadMethod='curl'):
     #then upload the backups that are not present in the remote ftp
     baseLocalPath = ''
     if not vmPathBackupFolderTree == '/':
@@ -81,12 +81,22 @@ def upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFold
                 #localFolderPath = "{0}/{1}/{2}".format(baseLocalPath, bkToUpload, dateFolder)
                 remoteFolderPath =  "{0}/{1}/{2}".format(ftphost.remoteVmFolder, bkToUpload, dateFolder)
                 logging.debug("The ftp upload from path {0} to remote path {1} will now start!".format(localFolderPath, remoteFolderPath))
-                #ftphost.syncFolders(localFolderPath,remoteFolderPath)
-                ftphost.ensure_remote_folder_path(remoteFolderPath)
-                # chiudo....
-                ftphost.close()
-                #ftphost.upload_using_ncftpput(localFolderPath,remoteFolderPath)
-                ftphost.upload_using_curl(localFolderPath,remoteFolderPath)
+                if uploadMethod == 'curl':
+                    logging.debug('upload will be perfomed using curl')
+                    #ftphost.close()
+                    ftphost.upload_using_curl(localFolderPath,remoteFolderPath)
+                elif uploadMethod == 'ncftpput':
+                    logging.debug('upload will be perfomed using ncftpput')
+                    ftphost.connect_to_host()
+                    ftphost.ensure_remote_folder_path(remoteFolderPath)
+                    ftphost.disconnect_from_host()
+                    ftphost.upload_using_ncftpput(localFolderPath,remoteFolderPath)
+                else:
+                    logging.debug('upload will be perfomed using ftputil')
+                    ftphost.connect_to_host()
+                    ftphost.upload_using_ftputil(localFolderPath,remoteFolderPath)
+                    ftphost.disconnect_from_host()
+
                 logging.debug("upload to remote path {0} finished successfully".format(remoteFolderPath))
 
 
@@ -105,6 +115,7 @@ def get_backups_for_upload_and_delete(backups, ftpHost):
     '''
     return the backups that need to be deleted and upload from/to the ftp server
     '''
+    ftpHost.connect_to_host()
     backupsOnServer = getBackupsFromFtpServer(ftpHost)
     #logging.debug("ftp server {0} has already the following backups:\n {1}".format(ftpHost.hostname,
     #    backupRender.get_backups_infos(backupsOnServer)))
@@ -121,6 +132,8 @@ def get_backups_for_upload_and_delete(backups, ftpHost):
     #else: logging.warn(
     #    "there is no need to upload new backups on {0} ftp server:the server has newer backups than local folder".format(
     #        ftpHost.hostname))
+
+    ftpHost.disconnect_from_host()
     return backupsToDelete, backupsToUpload
 
 def get_backups_diff(backUpSource, backUpToDiff):
