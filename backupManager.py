@@ -88,7 +88,7 @@ def upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFold
                 dateFolder = dateBackup.strftime("%Y-%m-%d-%H%M%S")
                 localFolderPath = os.path.join(baseLocalPath, bkToUpload, dateFolder)
                 #localFolderPath = "{0}/{1}/{2}".format(baseLocalPath, bkToUpload, dateFolder)
-                remoteFolderPath =  "{0}/{1}/{2}".format(ftphost.remoteVmFolder, bkToUpload, dateFolder)
+                remoteFolderPath =  "{0}/{1}/{2}".format(ftphost.remoteFolder, bkToUpload, dateFolder)
                 logging.debug("The ftp upload from path {0} to remote path {1} will now start!".format(localFolderPath, remoteFolderPath))
                 if uploadMethod == 'curl':
                     logging.debug('upload will be perfomed using curl')
