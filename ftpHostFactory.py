@@ -40,12 +40,16 @@ class FtpWrapper():
         self.remoteFolder = remoteFolder
 
     def connect_to_host(self):
+        logging.debug("a ftp connection to {0} will be perfomed".format(self.hostname) )
         self._ftplib =  ftputil.FTPHost(self.hostname, self.user, self.password, port=self.port, session_factory=FtpSession)
         if self.remoteFolder != None:
             self._ftplib.chdir(self.remoteFolder)
         else:
             self.remoteVmFolder = '/'
             self._ftplib.chdir('/')
+
+        logging.debug("a ftp connection to {0} has been made".format(self.hostname) )
+
 
     def disconnect_from_host(self):
         self._ftplib.close()
