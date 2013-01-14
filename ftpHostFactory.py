@@ -59,6 +59,9 @@ class FtpWrapper():
     def listdir(self,path):
         return self._ftplib.listdir(path)
 
+    def curdir(self):
+        return self._ftplib.curdir
+
 
     def sync(self, source_directory, target_directory):
 
