@@ -46,11 +46,11 @@ def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, re
     result.remoteFolder = remoteFolder
 
 
-    if remoteFolder != None:
-        result.remoteVmFolder = remoteFolder
-        result.chdir(remoteFolder)
-    else:
-        result.remoteVmFolder = '/'
+    #if remoteFolder != None:
+    #   result.remoteVmFolder = remoteFolder
+    #    result.chdir(remoteFolder)
+    #else:
+    #    result.remoteVmFolder = '/'
 
     # http://countergram.com/adding-bound-methods
     result.connect_to_host =  types.MethodType(connect_to_host, result, result.__class__)
@@ -65,8 +65,14 @@ def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, re
 
 def connect_to_host(self):
     ftplib.FTP.__init__(self)
-    self.connect(host, port)
-    self.login(userid, password)
+    self.connect(self.hostname, self.port)
+    self.login(self.user, self.password)
+
+    if result.remoteFolder != None:
+        result.chdir(remoteFolder)
+    else:
+        result.remoteVmFolder = '/'
+        result.chdir('/')
 
 def disconnect_from_host(self):
     self.close()
