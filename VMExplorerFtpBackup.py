@@ -227,7 +227,7 @@ def deleted_old_backups_from_ftp_servers(backups):
                          "If old backups are found, they will be deleted".format(connectionInfo[0]))
             ftpServersCleaned.append(connectionInfo[0])
             ftphost = _get_ftpHost_by_vmName(vmName)
-            #ftphost.connect_to_host()
+            ftphost.connect_to_host()
 
             backupsOnRemoteFtpServer =  backupManager.getBackupsFromFtpServer(ftphost)
             logging.debug("** Ftp Server [{0}] stores the following backups: \n{1}".format(connectionInfo[0],
@@ -247,13 +247,18 @@ def deleted_old_backups_from_ftp_servers(backups):
                     "Ftp Server [{0}] does not contains old backups. No file deletions will be performed.".format(
                         connectionInfo[0]))
             #ftphost.close()
-            #ftphost.disconnect_from_host()
+            ftphost.disconnect_from_host()
 
 def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
     for vmName in backups:
         ftphost = _get_ftpHost_by_vmName(vmName)
         logging.info("** backup's upload for VM {0} with ftp server {1} will now start!".format(vmName, ftphost.hostname))
+        ftphost.connect_to_host()
         backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
+        ftphost.disconnect_from_host()
+
+        # unico pezzo dove non e richiesta una connessione aperta
+
         if len(backupsToUpload) > 0:
             if _use_real_ftp_sync:
                 backupManager.upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree)

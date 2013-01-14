@@ -46,7 +46,7 @@ def getBackupsFromFolderTree(pathToFolder):
 
 def getBackupsFromFtpServer(ftpWrapper):
     # this is a dirty bug fix. the listdir cmd need to be executed twice to return the correct value,
-    ftpWrapper.connect_to_host()
+    #ftpWrapper.connect_to_host()
     ftplist = None
     try:
         ftplist = ftpWrapper.listdir('.')
@@ -68,10 +68,12 @@ def getBackupsFromFtpServer(ftpWrapper):
             files = ftpWrapper.listdir(serverName + '/' + date)
             backupsInServer[currentDate] = files
         result[serverName] = backupsInServer
-    ftpWrapper.disconnect_from_host()
+    #ftpWrapper.disconnect_from_host()
     return result
 
 def upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree, uploadMethod='curl'):
+    '######   this the only method that does not nned a ftp active connection #############'
+
     #then upload the backups that are not present in the remote ftp
     baseLocalPath = ''
     if not vmPathBackupFolderTree == '/':
@@ -122,7 +124,7 @@ def get_backups_for_upload_and_delete(backups, ftpHost):
     '''
     return the backups that need to be deleted and upload from/to the ftp server
     '''
-    ftpHost.connect_to_host()
+    #ftpHost.connect_to_host()
     backupsOnServer = getBackupsFromFtpServer(ftpHost)
     #logging.debug("ftp server {0} has already the following backups:\n {1}".format(ftpHost.hostname,
     #    backupRender.get_backups_infos(backupsOnServer)))
@@ -140,7 +142,7 @@ def get_backups_for_upload_and_delete(backups, ftpHost):
     #    "there is no need to upload new backups on {0} ftp server:the server has newer backups than local folder".format(
     #        ftpHost.hostname))
 
-    ftpHost.disconnect_from_host()
+    #ftpHost.disconnect_from_host()
     return backupsToDelete, backupsToUpload
 
 def get_backups_diff(backUpSource, backUpToDiff):
