@@ -30,7 +30,7 @@ import logging
 class FtpSession(ftplib.FTP):
     def __init__(self, host, userid, password, port):
         """Act like ftplib.FTP's constructor but connect to another port."""
-        ftplib.FTP.__init__(self)
+        #ftplib.FTP.__init__(self)
         #self.connect(host, port)
         #self.login(userid, password)
 
@@ -64,6 +64,7 @@ def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, re
 
 
 def connect_to_host(self):
+    ftplib.FTP.__init__(self)
     self.connect(host, port)
     self.login(userid, password)
 
