@@ -46,7 +46,6 @@ class FtpWrapper():
         else:
             self.remoteVmFolder = '/'
             self._ftplib.chdir('/')
-
         logging.debug("a ftp connection to {0} has been made".format(self.hostname) )
 
 
