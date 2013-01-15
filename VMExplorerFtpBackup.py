@@ -42,6 +42,8 @@ _softwareVersion = 0.1
 
 _use_real_ftp_sync = True
 
+_upload_method = None
+
 
 
 def main(params):
@@ -53,6 +55,10 @@ def main(params):
 
     global _use_real_ftp_sync
     _use_real_ftp_sync = not params.simulate
+
+    global _upload_method
+    _upload_method = params.uploadMethod
+
     if(_use_real_ftp_sync == False):
         logging.warn("* You have provided the -s parameter and no real action to ftp sync will be performed!")
 
@@ -262,8 +268,7 @@ def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
 
         if len(backupsToUpload) > 0:
             if _use_real_ftp_sync:
-                backupManager.upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree)
-#        ftphost.close()
+                backupManager.upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree, uploadMethod=_upload_method)
 
 #---------------------------
 #     private methods
@@ -376,6 +381,7 @@ if __name__ == "__main__":
     parser.add_option('-v', '--verbose', help='set the verbosity level. accepted values are: info, warn, error and debug', dest='verbosity', default='info')
     parser.add_option('-x', '--execute', help='runs a program if no errors occurs after the backup sync has performed', dest='execute')
     parser.add_option('-S', '--simulate', help='simulate the program execution: no ftp deletion or upload will be performed and no overwrite is done to the dump file', dest='simulate',  action="store_true", default=False)
+    parser.add_option('-u', '--UploadMethod', help='selects the default file method. valid options are: [curl],[ncftpput],[internal]. note that curls is the default', dest='uploadMethod', default='curl')
 
     (opts, args) = parser.parse_args()
     main(opts)
