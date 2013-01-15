@@ -65,6 +65,10 @@ class FtpWrapper():
        #     return self._ftplib.listdir(path[:-1])
         return self._ftplib.listdir(path)
 
+    def rmtree(self, path):
+        self._ftplib.rmdir(path)
+
+
     def curdir(self):
         return self._ftplib.curdir
 
