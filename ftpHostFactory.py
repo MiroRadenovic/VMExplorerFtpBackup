@@ -20,7 +20,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import types
+
 import ftplib
 import ftputil
 from ftputil import ftp_sync
@@ -67,10 +67,8 @@ class FtpWrapper():
     def rmtree(self, path):
         self._ftplib.rmtree(path)
 
-
     def curdir(self):
         return self._ftplib.curdir
-
 
     def sync(self, source_directory, target_directory):
 
@@ -133,103 +131,8 @@ class FtpSession(ftplib.FTP):
         self.login(userid, password)
 
 
-
-
-
 def create_ftpHost(hostname, user='anonymous', password='anonymous', port=21, remoteFolder=None):
     return FtpWrapper(hostname, user, password, port=port, remoteFolder=remoteFolder)
-
-#    result =  ftputil.FTPHost(hostname, user, password, port=port, session_factory=FtpSession)
-#    result.hostname = hostname
-#    result.user = user
-#    result.password = password
-#    result.port = port
-#    result.remoteFolder = remoteFolder
-#
-#
-#    #if remoteFolder != None:
-#    #   result.remoteVmFolder = remoteFolder
-#    #    result.chdir(remoteFolder)
-#    #else:
-#    #    result.remoteVmFolder = '/'
-#
-#    # http://countergram.com/adding-bound-methods
-#    result.connect_to_host =  types.MethodType(connect_to_host, result, result.__class__)
-#    result.disconnect_from_host =  types.MethodType(disconnect_from_host, result, result.__class__)
-#
-#    result.ensure_remote_folder_path =  types.MethodType(ensure_remote_folder_exist, result, result.__class__)
-#    result.upload_using_ncftpput = types.MethodType(upload_using_ncftpput, result, result.__class__)
-#    result.upload_using_curl = types.MethodType(upload_using_curl, result, result.__class__)
-#    result.upload_using_ftputil = types.MethodType(sync, result, result.__class__)
-
-#    return result
-
-
-
-
-def connect_to_host(self):
-    self.connect(self.hostname, self.port)
-    self.login(self.user, self.password)
-
-    if self.remoteFolder != None:
-        self.chdir(self.remoteFolder)
-    else:
-        self.remoteVmFolder = '/'
-        self.chdir('/')
-
-def disconnect_from_host(self):
-    self.close()
-
-
-def ensure_remote_folder_exist(ftpHost, remoteFolder):
-    try:
-        ftpHost.listdir(remoteFolder)
-    except Exception:
-        ftpHost.makedirs(remoteFolder)
-
-
-def sync(self, source_directory, target_directory):
-    def ensure_remote_folder_exist(ftpHost, remoteFolder):
-        try:
-            ftpHost.listdir(remoteFolder)
-        except Exception:
-            ftpHost.makedirs(remoteFolder)
-
-    ensure_remote_folder_exist(self, target_directory)
-    source = ftp_sync.LocalHost()
-    syncer = ftp_sync.Syncer(source, self)
-    syncer.sync(source_directory, target_directory)
-
-def upload_using_ncftpput(self, source_directory, target_directory):
-    try:
-        #ncftpput [flags] remote-host remote-dir local-files...
-
-        #df
-        p = Popen("ncftpput -R -u {user} -p {password} -P {port} {host} {remotedir} {localfiles}".format(
-            user=self.user, password=self.password, port=self.port, host= self.hostname,
-            remotedir=target_directory, localfiles=source_directory ))
-        stdout, stderr = p.communicate()
-        logging.debug(stdout)
-    except Exception as ex:
-        logging.error(ex)
-
-def upload_using_curl(self, source_directory, target_directory):
-    logging.warn("Curl upload!")
-
-    import os
-    filesToUpload = os.listdir(source_directory)
-    for file in filesToUpload:
-        logging.warn(source_directory)
-        logging.warn(file)
-        filePath = os.path.join(source_directory, file)
-        #curl.exe --ftp-create-dirs -T "D:\VirtualMachinesTemp\Toki\2013-01-11-111839\Toki_1-flat.vmdk.gz" --keepalive-time 5  --user u27737:ynrZIjI51YR6A9mW  ftp://u27737.your-backup.de/VirtualMachinesBackUps/Toki/2013-01-11-111839/
-        curlcommand="curl --ftp-create-dirs -T {filepath} --keepalive-time 5 --user {user}:{password} ftp://{host}{remotedir}/".format(
-            user=self.user, password=self.password, port=self.port, host= self.hostname,
-            remotedir=target_directory, filepath=filePath)
-        logging.debug(curlcommand)
-        p = Popen(curlcommand)
-        stdout, stderr = p.communicate()
-        logging.debug(stdout)
 
 
 
