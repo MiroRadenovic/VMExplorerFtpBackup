@@ -30,6 +30,13 @@ import logging
 
 
 class FtpWrapper():
+    '''
+    this class rappresents a wrapper to ftputil providing the ability to
+    - instance the class witout  actually connecting to the remote host
+    - perform uploads of files using ftputil, ncftput and curl
+    '''
+
+
     def __init__(self, hostname, user='anonymous', password='anonymous', port=21, remoteFolder=None):
 
         self._ftplib = None
@@ -112,13 +119,13 @@ class FtpWrapper():
             stdout, stderr = p.communicate()
             logging.debug(stdout)
 
-    def _open_connection_if_closed(self):
+    def open_connection_if_closed(self):
         if self._ftplib == None:
             self.connect_to_host()
         elif self._ftplib.closed:
             self.connect_to_host()
 
-    def _close_connection_if_open(self):
+    def close_connection_if_open(self):
         if self._ftplib != None:
             if not self._ftplib.closed:
                 self.disconnect_from_host()

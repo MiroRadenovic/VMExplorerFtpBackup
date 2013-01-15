@@ -106,8 +106,6 @@ def upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFold
 
                 logging.debug("upload to remote path {0} finished successfully".format(remoteFolderPath))
 
-
-
 def delete_backups_from_ftpHost(backupsToDelete, ftpHost):
     # first delete the backups that are on the remote ftp server that are not present in the backups dic
     for bkToDelete in backupsToDelete:
@@ -116,7 +114,6 @@ def delete_backups_from_ftpHost(backupsToDelete, ftpHost):
             remotePathToDelete= "{0}/{1}/{2}".format(ftpHost.remoteFolder, bkToDelete, dateBackup.strftime("%Y-%m-%d-%H%M%S"))
             ftpHost.rmtree(remotePathToDelete)
             logging.warn("**ftp remote path {0} has been deleted successfully".format(remotePathToDelete))
-
 
 def get_backups_for_upload_and_delete(backups, ftpHost):
     '''
@@ -141,7 +138,6 @@ def get_backups_diff(backUpSource, backUpToDiff):
             if len(foldersToDelete) > 0 : result[vmName] = foldersToDelete
         else: result[vmName] = backUpToDiff[vmName]
     return result
-
 
 def _getFilesFromFolder_(pathToBackUpFiles):
     filesToBackUp = []
