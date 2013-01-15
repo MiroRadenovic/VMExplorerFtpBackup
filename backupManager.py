@@ -115,7 +115,7 @@ def delete_backups_from_ftpHost(backupsToDelete, ftpHost):
     for bkToDelete in backupsToDelete:
         for dateBackup in backupsToDelete[bkToDelete]:
             logging.info("** {0}'s backup of date {1} will be now deleted".format(bkToDelete, dateBackup))
-            remotePathToDelete= "{0}/{1}/{2}".format(ftpHost.remoteVmFolder, bkToDelete, dateBackup.strftime("%Y-%m-%d-%H%M%S"))
+            remotePathToDelete= "{0}/{1}/{2}".format(ftpHost.remoteFolder, bkToDelete, dateBackup.strftime("%Y-%m-%d-%H%M%S"))
             ftpHost.rmtree(remotePathToDelete)
             logging.warn("**ftp remote path {0} has been deleted successfully".format(remotePathToDelete))
 
