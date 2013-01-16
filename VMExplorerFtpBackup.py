@@ -153,13 +153,24 @@ def _rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
             host = _get_ftpHost_by_vmName(vmName)
             host.connect_to_host()
             backupsInFtpHost = backupManager.getBackupsFromFtpServer(host)
-            #host.close()
             host.disconnect_from_host()
             _merge_first_backup_into_second_backup(backupsInFtpHost, backups)
     backupRender.get_backups_infos(backups)
     backupSerializer.saveBackupToDumpFile(backups, dumpFilePath)
     return backups
 
+
+
+def get_all_ftp_connections():
+    '''
+    returns a dictionary containing connection informations found in the config file
+    '''
+    result = {}
+    for vmName in config.VmToFtp:
+        serverHostName = config.VmToFtp[vmName][0]
+        if serverHostName not in result:
+            result[serverHostName] =  [ config.VmToFtp[vmName][1], config.VmToFtp[vmName][2],config.VmToFtp[vmName][3],config.VmToFtp[vmName][4] ]
+    return result
 
 def display_dump_file(dumpFilePath):
     '''

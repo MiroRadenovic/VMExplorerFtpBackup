@@ -296,6 +296,22 @@ class testVMExplorerFtpBackup(unittest.TestCase):
                     self.assertEqual(result, remoteBackups)
 
 
+    # USING [OK]
+    def testGet_all_ftp_connections(self):
+        VMExplorerFtpBackup.config = mock.Mock()
+        VMExplorerFtpBackup.config.VmToFtp = {
+            'Bart' : ['server1', '2001', 'anonymous', 'anonymous', '/' ],
+            'Ken' : ['server2', '2001', 'anonymous', 'anonymous', '/' ],
+            'Hyo' : ['server3', '2001', 'anonymous', 'anonymous', '/' ],
+            'Kaio' : ['server2', '2001', 'anonymous', 'anonymous', '/' ],
+            'Shin' : ['server1', '2001', 'anonymous', 'anonymous', '/' ],
+            'Shu' : ['server3', '2001', 'anonymous', 'anonymous', '/' ],
+            'Fudo' : ['server2', '2001', 'anonymous', 'anonymous', '/' ],
+            }
+
+        result = VMExplorerFtpBackup.get_all_ftp_connections()
+        self.assertTrue(len(result) == 3)
+
 
 
 
