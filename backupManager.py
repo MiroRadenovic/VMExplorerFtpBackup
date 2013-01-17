@@ -44,20 +44,8 @@ def getBackupsFromFolderTree(pathToFolder):
                       "specified the correct path where your vm backs are stored? are you using the correct folder name patter for dates?")
 
 def getBackupsFromFtpServer(ftpWrapper):
-    # this is a dirty bug fix. the listdir cmd need to be executed twice to return the correct value,
-    #ftpWrapper.connect_to_host()
-#    ftplist = None
-#    try:
-#        ftplist = ftpWrapper.listdir('.')
-#        logging.warn("1-" + str(ftplist))
-#    except Exception:
-#        ftplist = ftpWrapper.listdir('.')
-#        logging.warn("2-" + str(ftplist))
-
     result = {}
     names = ftpWrapper.listdir(ftpWrapper.curdir())
-    logging.warn(" [OKKKK]3-" + str(ftpWrapper.curdir()))
-
     for serverName in names:
         backupDates = ftpWrapper.listdir(serverName)
         backupsInServer = {}

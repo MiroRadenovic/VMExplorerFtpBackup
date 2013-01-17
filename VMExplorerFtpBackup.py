@@ -255,22 +255,6 @@ def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
 #     private methods
 #---------------------------
 
-
-#def _merge_first_backup_into_second_backup(backupToJoin, destinationBackupToJoin):
-#    '''
-#    Merges 2 backups into 1
-#    Args: backupToJoin [dic] the source
-#     destinationBackupToJoin [dic] the result of the merge
-#    '''
-#    for vm in backupToJoin:
-#        if vm in destinationBackupToJoin:
-#            currentDestinationMachine = destinationBackupToJoin[vm]
-#            for dateOfBackup in backupToJoin[vm]:
-#                if not currentDestinationMachine.has_key(dateOfBackup):
-#                    currentDestinationMachine[dateOfBackup] = backupToJoin[vm][dateOfBackup]
-#        else : destinationBackupToJoin[vm] = backupToJoin[vm]
-
-
 def _get_connectionInfo_by_vmName(vmName):
     if config.VmToFtp.has_key(vmName):
         connectionInfo = config.VmToFtp[vmName]
@@ -334,16 +318,7 @@ def _draw_welcome_banner():
     logging.info("##################################################\n")
 
 
-
-
-
-
-
-
 #---------------------------
-
-
-
 #    program start
 #---------------------------
 
