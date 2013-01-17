@@ -110,7 +110,6 @@ class FtpWrapper():
             logging.warn(source_directory)
             logging.warn(file)
             filePath = os.path.join(source_directory, file)
-            #curl.exe --ftp-create-dirs -T "D:\VirtualMachinesTemp\Toki\2013-01-11-111839\Toki_1-flat.vmdk.gz" --keepalive-time 5  --user u27737:ynrZIjI51YR6A9mW  ftp://u27737.your-backup.de/VirtualMachinesBackUps/Toki/2013-01-11-111839/
             curlcommand="curl --ftp-create-dirs -T {filepath} --keepalive-time 5 --user {user}:{password} ftp://{host}{remotedir}/".format(
                 user=self.user, password=self.password, port=self.port, host= self.hostname,
                 remotedir=target_directory, filepath=filePath)
