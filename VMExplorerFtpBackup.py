@@ -135,13 +135,15 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
         backupRender.get_backups_infos(backups)))
     logging.info("* This program will now start to synchronize the current VM backup status with the remote ftp servers."
                  " This means old backups will be deleted and new ones will be uploaded to specified ftp servers")
-    try:
-        sync_backups_with_ftp_servers(vmFolderTreePath, backups)
-    except Exception as ex:
-        logging.error("An error occurred while syncing the backup: {0}\n trace: {1}".format(ex, traceback.format_exc()))
-        raise ex
+    if _use_real_ftp_sync:
+        try:
+            sync_backups_with_ftp_servers(vmFolderTreePath, backups)
+        except Exception as ex:
+            logging.error("An error occurred while syncing the backup: {0}\n trace: {1}".format(ex, traceback.format_exc()))
+            raise ex
+    else: logging.info("As the parameter -S (Simulate) has been provided,  ftp sync will be skipped")
 
-    logging.debug("saving Virtual Machines backup status in the dumpfile on path: {0}".format(vmBackupHistoryDumpFilePath))
+    #logging.debug("saving Virtual Machines backup status in the dumpfile on path: {0}".format(vmBackupHistoryDumpFilePath))
     #if _use_real_ftp_sync:
         #backupSerializer.saveBackupToDumpFile(backups, vmBackupHistoryDumpFilePath)
     #logging.debug("the backups stored in the dump file are {0}".format(backupRender.get_backups_infos(backups)))
