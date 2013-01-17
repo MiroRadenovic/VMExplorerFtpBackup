@@ -63,25 +63,11 @@ def main(params):
         logging.warn("* You have provided the -s parameter and no real action to ftp sync will be performed!")
 
     try:
-#        if(params.rebuildDumpFile):
-#            answer = raw_input('This option will delete the current dump file and rebuild a new one. all backup statuses'' will be lost. press [Y] to confirm and continue\n')
-#            if answer.lower() == 'y':
-#                try:
-#                    logging.info('user selected option [Y] = delete old dump file and rebuild new one')
-#                    _rebuild_dump_file_from_backups_on_ftphosts(params.dumpFilePath)
-#                    logging.info('a new backup dump file has been created with the following backup info: \n{0}'.format(display_dump_file(params.dumpFilePath)))
-#                except Exception as ex:
-#                    logging.error(ex)
-#            else :
-#                print('ok, leaving... bye bye!')
-#        elif(params.status):
-#            display_dump_file(params.dumpFilePath)
-#        elif(params.start):
-#            start_backup(params.folder, params.dumpFilePath, params.numberOfBackups)
+        if(params.displayBackups):
+            logging.info("* backups stored into ftp servers are: \n: {0}".
+            format(backupRender.get_backups_infos(get_backups_from_ftp_servers())))
+        else: start_backup(params.folder, params.dumpFilePath, params.numberOfBackups)
 
-
-        start_backup(params.folder, params.dumpFilePath, params.numberOfBackups)
-        # if everthing runs ok, then we can execute esternal programs if -x params has been specified.
         if params.execute != None:
             logging.debug('-x has been specified. running: {0}'.format(params.execute))
             p = Popen(params.execute)
@@ -112,24 +98,13 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
 
     logging.debug("* the provided local path [{0}] contains the following backups that will be uploaded to respective" \
                   " ftp servers: \n {1}".format(vmFolderTreePath, backupRender.get_backups_infos(backupsToUpload)))
-
-    #backupsInDumpFile = backupSerializer.get_backups_from_dump_file_or_None(vmBackupHistoryDumpFilePath)
     backupsOnFtpServers = get_backups_from_ftp_servers()
     logging.info("* backups stored into ftp servers are: \n: {1}".format(vmBackupHistoryDumpFilePath,
         backupRender.get_backups_infos(backupsOnFtpServers)))
-
-#    if (len(backupsInDumpFile) > 0):
-#        logging.debug("* current dump file (from file {0}) contains: \n: {1}".format(vmBackupHistoryDumpFilePath,
-#            backupRender.get_backups_infos(backupsInDumpFile)))
-
     backups = backupManager.get_merge_of_backups(backupsToUpload, backupsOnFtpServers)
-
-    #logging.debug("* the merging of the 2 backups is:\n {0}".format(backupRender.get_backups_infos(backups)))
     logging.info("* the merge of backups found in backup folder and those present int the dump file has finished"
                   " successfully. The next step is to remove old backus.")
-
     sort_and_remove_old_backups(backups, numberOfBackupsToKeep)
-
     logging.debug("* removing of old backups (max {0} backups) has finished.".format(numberOfBackupsToKeep))
     logging.info("* the current backup status is:\n{1}".format(numberOfBackupsToKeep,
         backupRender.get_backups_infos(backups)))
@@ -142,11 +117,6 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
             logging.error("An error occurred while syncing the backup: {0}\n trace: {1}".format(ex, traceback.format_exc()))
             raise ex
     else: logging.info("As the parameter -S (Simulate) has been provided,  ftp sync will be skipped")
-
-    #logging.debug("saving Virtual Machines backup status in the dumpfile on path: {0}".format(vmBackupHistoryDumpFilePath))
-    #if _use_real_ftp_sync:
-        #backupSerializer.saveBackupToDumpFile(backups, vmBackupHistoryDumpFilePath)
-    #logging.debug("the backups stored in the dump file are {0}".format(backupRender.get_backups_infos(backups)))
 
 
 def get_backups_from_ftp_servers():
@@ -170,22 +140,6 @@ def get_backups_from_ftp_servers():
             logging.error("an error occurred in trying to get read backups from host {0}. Please make sure the ftp "
                           "connection to the host is correct")
     return result
-
-
-
-#def _rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
-#    backups = {}
-#    for vmName in config.VmToFtp:
-#        if not vmName == '*':
-#            host = _get_ftpHost_by_vmName(vmName)
-#            host.connect_to_host()
-#            backupsInFtpHost = backupManager.getBackupsFromFtpServer(host)
-#            host.disconnect_from_host()
-#            _merge_first_backup_into_second_backup(backupsInFtpHost, backups)
-#    backupRender.get_backups_infos(backups)
-#    backupSerializer.saveBackupToDumpFile(backups, dumpFilePath)
-#    return backups
-
 
 
 def get_all_ftp_connections():
@@ -399,11 +353,10 @@ if __name__ == "__main__":
     # starts the backup and options
     parser.add_option('-s', '--start', help='starts the backup', dest='start', action="store_true", default=True)
     parser.add_option('-f', '--folder', help='sets the start folder to parse', dest='folder' ,default='.')
-    parser.add_option('-d', '--dumpFilePath', help='path to dumpfile', dest='dumpFilePath' ,default='dump.dm')
     parser.add_option('-n', '--numberOfBackups', help='path to dumpfile', dest='numberOfBackups' ,default='3')
     parser.add_option('-c', '--configFtp', help='set the alternative config file that stores ftp connections', dest='configFtp', default='config')
     # rebuild the local database dump file
-    parser.add_option('-r', '--rebuildDumpFile', help='recreates a new database dump file by reading backups stored into defined ftp sites', dest='rebuildDumpFile',  action="store_true", default=False)
+    parser.add_option('-d', '--displayBackupsFromFtpServers', help='displays the backups located in ftp servers', dest='displayBackups',  action="store_true", default=False)
     #display info options
     parser.add_option('-z', '--status', help='displays the status of the backups: info related to the next upload and the current dump file', dest='status', action="store_true", default=False)
     parser.add_option('-v', '--verbose', help='set the verbosity level. accepted values are: info, warn, error and debug', dest='verbosity', default='info')
