@@ -139,6 +139,21 @@ def get_backups_diff(backUpSource, backUpToDiff):
         else: result[vmName] = backUpToDiff[vmName]
     return result
 
+
+def merge_first_backup_into_second_backup(backupToJoin, destinationBackupToJoin):
+    '''
+    Merges 2 backups into 1
+    Args: backupToJoin [dic] the source
+     destinationBackupToJoin [dic] the result of the merge
+    '''
+    for vm in backupToJoin:
+        if vm in destinationBackupToJoin:
+            currentDestinationMachine = destinationBackupToJoin[vm]
+            for dateOfBackup in backupToJoin[vm]:
+                if not currentDestinationMachine.has_key(dateOfBackup):
+                    currentDestinationMachine[dateOfBackup] = backupToJoin[vm][dateOfBackup]
+        else : destinationBackupToJoin[vm] = backupToJoin[vm]
+
 def _getFilesFromFolder_(pathToBackUpFiles):
     filesToBackUp = []
     for file in os.listdir(pathToBackUpFiles):

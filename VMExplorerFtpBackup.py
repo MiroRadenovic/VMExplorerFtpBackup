@@ -147,23 +147,43 @@ def _rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
     rebuilds a new dump file by scanning all ftp server's defined in the configuration config.py file.
     Args: dumpFilePath: str -> the path of the dumpfile
     '''
-    backups = {}
-    for vmName in config.VmToFtp:
-        if not vmName == '*':
-            host = _get_ftpHost_by_vmName(vmName)
-            host.connect_to_host()
-            backupsInFtpHost = backupManager.getBackupsFromFtpServer(host)
-            host.disconnect_from_host()
-            _merge_first_backup_into_second_backup(backupsInFtpHost, backups)
-    backupRender.get_backups_infos(backups)
-    backupSerializer.saveBackupToDumpFile(backups, dumpFilePath)
-    return backups
+
+    result = {}
+    ftpConnections = get_all_ftp_connections()
+    for server in ftpConnections:
+        ftpWrapper = ftpHostFactory.create_ftpHost(server, port=ftpConnections[server][0],
+            user=ftpConnections[server][1], password=ftpConnections[server][2],remoteFolder=ftpConnections[server][3])
+
+        try:
+            ftpWrapper.connect_to_host()
+            backupsInFtpHost = backupManager.getBackupsFromFtpServer(ftpWrapper)
+            ftpWrapper.disconnect_from_host()
+            backupManager.merge_first_backup_into_second_backup(backupsInFtpHost, result)
+        except Exception:
+            logging.error("an error occurred in trying to get read backups from host {0}. Please make sure the ftp "
+                          "connection to the host is correct")
+    return result
+
+
+
+#
+#    backups = {}
+#    for vmName in config.VmToFtp:
+#        if not vmName == '*':
+#            host = _get_ftpHost_by_vmName(vmName)
+#            host.connect_to_host()
+#            backupsInFtpHost = backupManager.getBackupsFromFtpServer(host)
+#            host.disconnect_from_host()
+#            _merge_first_backup_into_second_backup(backupsInFtpHost, backups)
+#    backupRender.get_backups_infos(backups)
+#    backupSerializer.saveBackupToDumpFile(backups, dumpFilePath)
+#    return backups
 
 
 
 def get_all_ftp_connections():
     '''
-    returns a dictionary containing connection informations found in the config file
+    returns a dictionary containing connection information's found in the config file
     '''
     result = {}
     for vmName in config.VmToFtp:
@@ -193,8 +213,8 @@ def get_merge_of_backups(backup1, backup2):
     result: the dictionary of backups that stores all elements from  the backup1 and backup2.
     '''
     result ={}
-    _merge_first_backup_into_second_backup(backup1, result)
-    _merge_first_backup_into_second_backup(backup2, result)
+    backupManager.merge_first_backup_into_second_backup(backup1, result)
+    backupManager.merge_first_backup_into_second_backup(backup2, result)
     return result
 
 def sort_and_remove_old_backups(backups, maxNumberOfBackupsToKeepForSingleVm):
@@ -286,19 +306,19 @@ def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
 #---------------------------
 
 
-def _merge_first_backup_into_second_backup(backupToJoin, destinationBackupToJoin):
-    '''
-    Merges 2 backups into 1
-    Args: backupToJoin [dic] the source
-     destinationBackupToJoin [dic] the result of the merge
-    '''
-    for vm in backupToJoin:
-        if vm in destinationBackupToJoin:
-            currentDestinationMachine = destinationBackupToJoin[vm]
-            for dateOfBackup in backupToJoin[vm]:
-                if not currentDestinationMachine.has_key(dateOfBackup):
-                    currentDestinationMachine[dateOfBackup] = backupToJoin[vm][dateOfBackup]
-        else : destinationBackupToJoin[vm] = backupToJoin[vm]
+#def _merge_first_backup_into_second_backup(backupToJoin, destinationBackupToJoin):
+#    '''
+#    Merges 2 backups into 1
+#    Args: backupToJoin [dic] the source
+#     destinationBackupToJoin [dic] the result of the merge
+#    '''
+#    for vm in backupToJoin:
+#        if vm in destinationBackupToJoin:
+#            currentDestinationMachine = destinationBackupToJoin[vm]
+#            for dateOfBackup in backupToJoin[vm]:
+#                if not currentDestinationMachine.has_key(dateOfBackup):
+#                    currentDestinationMachine[dateOfBackup] = backupToJoin[vm][dateOfBackup]
+#        else : destinationBackupToJoin[vm] = backupToJoin[vm]
 
 
 def _get_connectionInfo_by_vmName(vmName):
@@ -359,7 +379,8 @@ def _import_ftp_config(configToImport):
         raise ImportError
 
 def _draw_welcome_banner():
-    logging.info("\n\n########## VMExplorerFtpBackUp v.{0} #############".format(_softwareVersion))
+    logging.info("\n\n##################################################")
+    logging.info("########## VMExplorerFtpBackUp v.{0} #############".format(_softwareVersion))
     logging.info("##################################################\n")
 
 
