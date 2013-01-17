@@ -117,7 +117,7 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
         logging.debug("* current dump file (from file {0}) contains: \n: {1}".format(vmBackupHistoryDumpFilePath,
             backupRender.get_backups_infos(backupsInDumpFile)))
 
-    backups = get_merge_of_backups(backupsToUpload, backupsInDumpFile)
+    backups = backupManager.get_merge_of_backups(backupsToUpload, backupsInDumpFile)
 
     #logging.debug("* the merging of the 2 backups is:\n {0}".format(backupRender.get_backups_infos(backups)))
     logging.debug("* the merge of backups found in backup folder and those present int the dump file has finished"
@@ -205,17 +205,6 @@ def display_dump_file(dumpFilePath):
 #---------------------------
 
 
-def get_merge_of_backups(backup1, backup2):
-    '''
-    merges 2 dictionary of backups into 1
-    Args:   backup1 : dic -> first backup to merge
-            backup2 : dic -> second backup to merge
-    result: the dictionary of backups that stores all elements from  the backup1 and backup2.
-    '''
-    result ={}
-    backupManager.merge_first_backup_into_second_backup(backup1, result)
-    backupManager.merge_first_backup_into_second_backup(backup2, result)
-    return result
 
 def sort_and_remove_old_backups(backups, maxNumberOfBackupsToKeepForSingleVm):
     '''

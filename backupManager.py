@@ -154,6 +154,18 @@ def merge_first_backup_into_second_backup(backupToJoin, destinationBackupToJoin)
                     currentDestinationMachine[dateOfBackup] = backupToJoin[vm][dateOfBackup]
         else : destinationBackupToJoin[vm] = backupToJoin[vm]
 
+def get_merge_of_backups(backup1, backup2):
+    '''
+    merges 2 dictionary of backups into 1
+    Args:   backup1 : dic -> first backup to merge
+            backup2 : dic -> second backup to merge
+    result: the dictionary of backups that stores all elements from  the backup1 and backup2.
+    '''
+    result ={}
+    merge_first_backup_into_second_backup(backup1, result)
+    merge_first_backup_into_second_backup(backup2, result)
+    return result
+
 def _getFilesFromFolder_(pathToBackUpFiles):
     filesToBackUp = []
     for file in os.listdir(pathToBackUpFiles):
