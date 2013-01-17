@@ -63,22 +63,24 @@ def main(params):
         logging.warn("* You have provided the -s parameter and no real action to ftp sync will be performed!")
 
     try:
-        if(params.rebuildDumpFile):
-            answer = raw_input('This option will delete the current dump file and rebuild a new one. all backup statuses'' will be lost. press [Y] to confirm and continue\n')
-            if answer.lower() == 'y':
-                try:
-                    logging.info('user selected option [Y] = delete old dump file and rebuild new one')
-                    _rebuild_dump_file_from_backups_on_ftphosts(params.dumpFilePath)
-                    logging.info('a new backup dump file has been created with the following backup info: \n{0}'.format(display_dump_file(params.dumpFilePath)))
-                except Exception as ex:
-                    logging.error(ex)
-            else :
-                print('ok, leaving... bye bye!')
-        elif(params.status):
-            display_dump_file(params.dumpFilePath)
-        elif(params.start):
-            start_backup(params.folder, params.dumpFilePath, params.numberOfBackups)
+#        if(params.rebuildDumpFile):
+#            answer = raw_input('This option will delete the current dump file and rebuild a new one. all backup statuses'' will be lost. press [Y] to confirm and continue\n')
+#            if answer.lower() == 'y':
+#                try:
+#                    logging.info('user selected option [Y] = delete old dump file and rebuild new one')
+#                    _rebuild_dump_file_from_backups_on_ftphosts(params.dumpFilePath)
+#                    logging.info('a new backup dump file has been created with the following backup info: \n{0}'.format(display_dump_file(params.dumpFilePath)))
+#                except Exception as ex:
+#                    logging.error(ex)
+#            else :
+#                print('ok, leaving... bye bye!')
+#        elif(params.status):
+#            display_dump_file(params.dumpFilePath)
+#        elif(params.start):
+#            start_backup(params.folder, params.dumpFilePath, params.numberOfBackups)
 
+
+        start_backup(params.folder, params.dumpFilePath, params.numberOfBackups)
         # if everthing runs ok, then we can execute esternal programs if -x params has been specified.
         if params.execute != None:
             logging.debug('-x has been specified. running: {0}'.format(params.execute))
@@ -111,22 +113,25 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
     logging.debug("* the provided local path [{0}] contains the following backups that will be uploaded to respective" \
                   " ftp servers: \n {1}".format(vmFolderTreePath, backupRender.get_backups_infos(backupsToUpload)))
 
-    backupsInDumpFile = backupSerializer.get_backups_from_dump_file_or_None(vmBackupHistoryDumpFilePath)
+    #backupsInDumpFile = backupSerializer.get_backups_from_dump_file_or_None(vmBackupHistoryDumpFilePath)
+    backupsOnFtpServers = get_backups_from_ftp_servers()
+    logging.info("* backups stored into ftp servers are: \n: {1}".format(vmBackupHistoryDumpFilePath,
+        backupRender.get_backups_infos(backupsOnFtpServers)))
 
-    if (len(backupsInDumpFile) > 0):
-        logging.debug("* current dump file (from file {0}) contains: \n: {1}".format(vmBackupHistoryDumpFilePath,
-            backupRender.get_backups_infos(backupsInDumpFile)))
+#    if (len(backupsInDumpFile) > 0):
+#        logging.debug("* current dump file (from file {0}) contains: \n: {1}".format(vmBackupHistoryDumpFilePath,
+#            backupRender.get_backups_infos(backupsInDumpFile)))
 
-    backups = backupManager.get_merge_of_backups(backupsToUpload, backupsInDumpFile)
+    backups = backupManager.get_merge_of_backups(backupsToUpload, backupsOnFtpServers)
 
     #logging.debug("* the merging of the 2 backups is:\n {0}".format(backupRender.get_backups_infos(backups)))
-    logging.debug("* the merge of backups found in backup folder and those present int the dump file has finished"
+    logging.info("* the merge of backups found in backup folder and those present int the dump file has finished"
                   " successfully. The next step is to remove old backus.")
 
     sort_and_remove_old_backups(backups, numberOfBackupsToKeep)
 
     logging.debug("* removing of old backups (max {0} backups) has finished.".format(numberOfBackupsToKeep))
-    logging.info("* the actual representation of current backup status is:\n{1}".format(numberOfBackupsToKeep,
+    logging.info("* the current backup status is:\n{1}".format(numberOfBackupsToKeep,
         backupRender.get_backups_infos(backups)))
     logging.info("* This program will now start to synchronize the current VM backup status with the remote ftp servers."
                  " This means old backups will be deleted and new ones will be uploaded to specified ftp servers")
@@ -137,12 +142,12 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
         raise ex
 
     logging.debug("saving Virtual Machines backup status in the dumpfile on path: {0}".format(vmBackupHistoryDumpFilePath))
-    if _use_real_ftp_sync:
-        backupSerializer.saveBackupToDumpFile(backups, vmBackupHistoryDumpFilePath)
-    logging.debug("the backups stored in the dump file are {0}".format(backupRender.get_backups_infos(backups)))
+    #if _use_real_ftp_sync:
+        #backupSerializer.saveBackupToDumpFile(backups, vmBackupHistoryDumpFilePath)
+    #logging.debug("the backups stored in the dump file are {0}".format(backupRender.get_backups_infos(backups)))
 
 
-def _rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
+def get_backups_from_ftp_servers():
     '''
     rebuilds a new dump file by scanning all ftp server's defined in the configuration config.py file.
     Args: dumpFilePath: str -> the path of the dumpfile
@@ -166,7 +171,7 @@ def _rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
 
 
 
-#
+#def _rebuild_dump_file_from_backups_on_ftphosts(dumpFilePath):
 #    backups = {}
 #    for vmName in config.VmToFtp:
 #        if not vmName == '*':
