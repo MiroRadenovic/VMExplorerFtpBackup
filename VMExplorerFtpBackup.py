@@ -30,6 +30,8 @@ import backupManager
 import backupRender
 import backupSerializer
 import ftpHostFactory
+import mailManager
+
 import ColorizingStreamHandler
 
 
@@ -41,8 +43,8 @@ _softwareVersion = 0.1
 # program start
 
 _use_real_ftp_sync = True
-
 _upload_method = None
+_send_mail = True
 
 
 
@@ -59,6 +61,10 @@ def main(params):
     global _upload_method
     _upload_method = params.uploadMethod
 
+    global _send_mail
+    _send_mail = params.sendMail
+
+
     if(_use_real_ftp_sync == False):
         logging.warn("* You have provided the -s parameter and no real action to ftp sync will be performed!")
 
@@ -66,7 +72,8 @@ def main(params):
         if(params.displayBackups):
             logging.info("* backups stored into ftp servers are: \n: {0}".
             format(backupRender.get_backups_infos(get_backups_from_ftp_servers())))
-        else: start_backup(params.folder, params.numberOfBackups)
+        else:
+            start_backup(params.folder, params.numberOfBackups)
 
         if params.execute != None:
             logging.debug('-x has been specified. running: {0}'.format(params.execute))
@@ -90,32 +97,43 @@ def start_backup(vmFolderTreePath, numberOfBackupsToKeep):
             vmBackupHistoryDumpFilePath: str -> path to the dump file that stores the backupHistory
             numberOfBackupsToKeep: int -> number of tha max backups to keep. old backups will be removed
     '''
-    backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTreePath)
-    if len(backupsToUpload) == 0:
-        logging.warn("No new backups are found in folder {0} . there is no need to continue! exiting....".format(vmFolderTreePath))
-        import sys
-        sys.exit()
 
-    logging.debug("* the provided local path [{0}] contains the following backups that will be uploaded to respective" \
-                  " ftp servers: \n {1}".format(vmFolderTreePath, backupRender.get_backups_infos(backupsToUpload)))
-    backupsOnFtpServers = get_backups_from_ftp_servers()
-    logging.info("* backups stored into ftp servers are: \n: {0}".format(backupRender.get_backups_infos(backupsOnFtpServers)))
-    backups = backupManager.get_merge_of_backups(backupsToUpload, backupsOnFtpServers)
-    logging.info("* the merge of backups found in backup folder and those present int the dump file has finished"
-                  " successfully. The next step is to remove old backus.")
-    sort_and_remove_old_backups(backups, numberOfBackupsToKeep)
-    logging.debug("* removing of old backups (max {0} backups) has finished.".format(numberOfBackupsToKeep))
-    logging.info("* the current backup status is:\n{1}".format(numberOfBackupsToKeep,
-        backupRender.get_backups_infos(backups)))
-    logging.info("* This program will now start to synchronize the current VM backup status with the remote ftp servers."
-                 " This means old backups will be deleted and new ones will be uploaded to specified ftp servers")
-    if _use_real_ftp_sync:
-        try:
-            sync_backups_with_ftp_servers(vmFolderTreePath, backups)
-        except Exception as ex:
-            logging.error("An error occurred while syncing the backup: {0}\n trace: {1}".format(ex, traceback.format_exc()))
-            raise ex
-    else: logging.info("As the parameter -S (Simulate) has been provided,  ftp sync will be skipped")
+    try:
+
+        backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTreePath)
+        if len(backupsToUpload) == 0:
+            logging.warn("No new backups are found in folder {0} . there is no need to continue! exiting....".format(vmFolderTreePath))
+            import sys
+            sys.exit()
+
+        logging.debug("* the provided local path [{0}] contains the following backups that will be uploaded to respective" \
+                      " ftp servers: \n {1}".format(vmFolderTreePath, backupRender.get_backups_infos(backupsToUpload)))
+        backupsOnFtpServers = get_backups_from_ftp_servers()
+        logging.info("* backups stored into ftp servers are: \n: {0}".format(backupRender.get_backups_infos(backupsOnFtpServers)))
+        backups = backupManager.get_merge_of_backups(backupsToUpload, backupsOnFtpServers)
+        logging.info("* the merge of backups found in backup folder and those present int the dump file has finished"
+                      " successfully. The next step is to remove old backus.")
+        sort_and_remove_old_backups(backups, numberOfBackupsToKeep)
+        logging.debug("* removing of old backups (max {0} backups) has finished.".format(numberOfBackupsToKeep))
+        logging.info("* the current backup status is:\n{1}".format(numberOfBackupsToKeep,
+            backupRender.get_backups_infos(backups)))
+        logging.info("* This program will now start to synchronize the current VM backup status with the remote ftp servers."
+                     " This means old backups will be deleted and new ones will be uploaded to specified ftp servers")
+        if _use_real_ftp_sync:
+            try:
+                sync_backups_with_ftp_servers(vmFolderTreePath, backups)
+            except Exception as ex:
+                logging.error("An error occurred while syncing the backup: {0}\n trace: {1}".format(ex, traceback.format_exc()))
+                raise ex
+        else: logging.info("As the parameter -S (Simulate) has been provided,  ftp sync will be skipped")
+
+        if _send_mail:
+            mailManager.send_email_with_log(config.SmtpInfo)
+
+    except Exception:
+        if _send_mail:
+            mailManager.send_email_with_log(config.SmtpInfo, useSubjectWithError = True)
+        raise
 
 
 def get_backups_from_ftp_servers():
@@ -233,7 +251,7 @@ def deleted_old_backups_from_ftp_servers(backups):
                 logging.info(
                     "Ftp Server [{0}] does not contains old backups. No file deletions will be performed.".format(
                         connectionInfo[0]))
-            #ftphost.close()
+
             ftphost.disconnect_from_host()
 
 def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
@@ -327,20 +345,17 @@ def _draw_welcome_banner():
 
 if __name__ == "__main__":
     parser = optparse.OptionParser()
-    # todo: how to use confilcs?
-    # starts the backup and options
     parser.add_option('-s', '--start', help='starts the backup', dest='start', action="store_true", default=True)
     parser.add_option('-f', '--folder', help='sets the start folder to parse', dest='folder' ,default='.')
     parser.add_option('-n', '--numberOfBackups', help='path to dumpfile', dest='numberOfBackups' ,default='3')
     parser.add_option('-c', '--configFtp', help='set the alternative config file that stores ftp connections', dest='configFtp', default='config')
-    # rebuild the local database dump file
     parser.add_option('-d', '--displayBackupsFromFtpServers', help='displays the backups located in ftp servers', dest='displayBackups',  action="store_true", default=False)
-    #display info options
     parser.add_option('-z', '--status', help='displays the status of the backups: info related to the next upload and the current dump file', dest='status', action="store_true", default=False)
     parser.add_option('-v', '--verbose', help='set the verbosity level. accepted values are: info, warn, error and debug', dest='verbosity', default='info')
     parser.add_option('-x', '--execute', help='runs a program if no errors occurs after the backup sync has performed', dest='execute')
     parser.add_option('-S', '--simulate', help='simulate the program execution: no ftp deletion or upload will be performed and no overwrite is done to the dump file', dest='simulate',  action="store_true", default=False)
     parser.add_option('-u', '--UploadMethod', help='selects the default file method. valid options are: [curl],[ncftpput],[internal]. note that curls is the default', dest='uploadMethod', default='curl')
+    parser.add_option('-m', '--mail', help='sends email with the log', dest='sendMail',  action="store_true", default=False)
 
     (opts, args) = parser.parse_args()
     main(opts)

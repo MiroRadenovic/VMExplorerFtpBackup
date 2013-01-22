@@ -117,6 +117,12 @@ class FtpWrapper():
             p = Popen(curlcommand)
             stdout, stderr = p.communicate()
             logging.debug(stdout)
+            p.poll()
+            curlReturnValue = p.returncode
+            if(curlReturnValue != 0):
+                logging.error("CURL has encurred into an error! the program execution will stop!")
+
+
 
     def open_connection_if_closed(self):
         if self._ftplib == None:
