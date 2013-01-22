@@ -23,6 +23,7 @@ miro
 
 import optparse
 import logging
+import logging.handlers
 from subprocess import Popen
 import traceback
 
@@ -318,8 +319,8 @@ def _configure_logger(verbosity):
     root.setLevel(verbosityLevels[verbosity])
     root.addHandler(ColorizingStreamHandler.ColorizingStreamHandler())
 
-    fileLogger = logging.FileHandler('VMExplorer.log')
-    root.addHandler(fileLogger)
+    timedFileLogger = logging.handlers.TimedRotatingFileHandler('VMExplorer.log',when='h', backupCount=10)
+    root.addHandler(timedFileLogger)
 
 
    # try:

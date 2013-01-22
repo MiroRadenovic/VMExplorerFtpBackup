@@ -111,7 +111,7 @@ class FtpWrapper():
             logging.warn(file)
             filePath = os.path.join(source_directory, file)
             curlcommand="curl --ftp-create-dirs -T {filepath} --keepalive-time 5 --user {user}:{password} ftp://{host}{remotedir}/".format(
-                user=self.user, password=self.password +"dssdsdsd", port=self.port, host= self.hostname,
+                user=self.user, password=self.password, port=self.port, host= self.hostname,
                 remotedir=target_directory, filepath=filePath)
             logging.debug(curlcommand)
             p = Popen(curlcommand)
