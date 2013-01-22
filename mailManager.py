@@ -5,10 +5,6 @@ __user = 'VMExplorerFtpBackup@dev4side.com'
 #http://www.mkyong.com/python/how-do-send-email-in-python-via-smtplib/
 
 def send_email_with_log(SmtpInfo, useSubjectWithError = False):
-    import pdb
-    pdb.set_trace()
-
-    to = 'mkyong2002@yahoo.com'
     smtpserver = smtplib.SMTP(SmtpInfo['smtpserver'])
     smtpserver.ehlo()
     if(useSubjectWithError):
@@ -16,7 +12,7 @@ def send_email_with_log(SmtpInfo, useSubjectWithError = False):
     else:
         header = 'To:' + SmtpInfo['to'] + '\n' + 'From: ' + SmtpInfo['from'] + '\n' + 'Subject:'+ SmtpInfo['subjectWithError'] + '\n'
     msg = header + '\n'+ readLogFile() + '\n\n'
-    smtpserver.sendmail(__user, to, msg)
+    smtpserver.sendmail(SmtpInfo['from'],SmtpInfo['to'], msg)
     smtpserver.close()
 
 def readLogFile():
