@@ -90,6 +90,8 @@ def main(params):
 
 # programs options
 
+
+
 def start_backup(vmFolderTreePath, numberOfBackupsToKeep):
     '''
     starts the backup programs.
@@ -127,12 +129,10 @@ def start_backup(vmFolderTreePath, numberOfBackupsToKeep):
                 raise ex
         else: logging.info("As the parameter -S (Simulate) has been provided,  ftp sync will be skipped")
 
-        if _send_mail:
-            mailManager.send_email_with_log(config.SmtpInfo)
+        _send_mail(False)
 
     except Exception:
-        if _send_mail:
-            mailManager.send_email_with_log(config.SmtpInfo, useSubjectWithError = True)
+        _send_mail(True)
         raise
 
 
@@ -271,6 +271,19 @@ def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
 #---------------------------
 #     private methods
 #---------------------------
+
+
+def _send_mail(hasError):
+    if _send_mail:
+        logging.debug("a mail will be now sent")
+        if hasError:
+            mailManager.send_email_with_log(config.SmtpInfo, useSubjectWithError=True)
+        else:
+            mailManager.send_email_with_log(config.SmtpInfo)
+        logging.info("a mail has been sent")
+    else:
+        logging.info("no mail will be send")
+
 
 def _get_connectionInfo_by_vmName(vmName):
     if config.VmToFtp.has_key(vmName):
