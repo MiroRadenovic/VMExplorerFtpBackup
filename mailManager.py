@@ -8,9 +8,9 @@ def send_email_with_log(SmtpInfo, useSubjectWithError = False):
     smtpserver = smtplib.SMTP(SmtpInfo['smtpserver'])
     smtpserver.ehlo()
     if(useSubjectWithError):
-        header = 'To:' + SmtpInfo['to'] + '\n' + 'From: ' + SmtpInfo['from'] + '\n' + 'Subject:'+ SmtpInfo['subject'] + '\n'
-    else:
         header = 'To:' + SmtpInfo['to'] + '\n' + 'From: ' + SmtpInfo['from'] + '\n' + 'Subject:'+ SmtpInfo['subjectWithError'] + '\n'
+    else:
+        header = 'To:' + SmtpInfo['to'] + '\n' + 'From: ' + SmtpInfo['from'] + '\n' + 'Subject:'+ SmtpInfo['subject'] + '\n'
     msg = header + '\n'+ readLogFile() + '\n\n'
     smtpserver.sendmail(SmtpInfo['from'],SmtpInfo['to'], msg)
     smtpserver.close()
