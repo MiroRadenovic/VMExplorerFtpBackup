@@ -66,7 +66,7 @@ def main(params):
         if(params.displayBackups):
             logging.info("* backups stored into ftp servers are: \n: {0}".
             format(backupRender.get_backups_infos(get_backups_from_ftp_servers())))
-        else: start_backup(params.folder, params.dumpFilePath, params.numberOfBackups)
+        else: start_backup(params.folder, params.numberOfBackups)
 
         if params.execute != None:
             logging.debug('-x has been specified. running: {0}'.format(params.execute))
@@ -83,7 +83,7 @@ def main(params):
 
 # programs options
 
-def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsToKeep):
+def start_backup(vmFolderTreePath, numberOfBackupsToKeep):
     '''
     starts the backup programs.
     Args:   vmFolderTreePath: str -> path of the folder that contains the virtual machines backups
@@ -99,8 +99,7 @@ def start_backup(vmFolderTreePath, vmBackupHistoryDumpFilePath, numberOfBackupsT
     logging.debug("* the provided local path [{0}] contains the following backups that will be uploaded to respective" \
                   " ftp servers: \n {1}".format(vmFolderTreePath, backupRender.get_backups_infos(backupsToUpload)))
     backupsOnFtpServers = get_backups_from_ftp_servers()
-    logging.info("* backups stored into ftp servers are: \n: {1}".format(vmBackupHistoryDumpFilePath,
-        backupRender.get_backups_infos(backupsOnFtpServers)))
+    logging.info("* backups stored into ftp servers are: \n: {0}".format(backupRender.get_backups_infos(backupsOnFtpServers)))
     backups = backupManager.get_merge_of_backups(backupsToUpload, backupsOnFtpServers)
     logging.info("* the merge of backups found in backup folder and those present int the dump file has finished"
                   " successfully. The next step is to remove old backus.")

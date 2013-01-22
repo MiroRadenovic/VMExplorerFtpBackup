@@ -10,12 +10,11 @@ HOW IT WORKS
 the process is easy:
 * VMExplorer will perform all the virtual machine backups and store them to a local path ex: c:\VirtualMachinesTemp
 * once VMExplorer has finished the job, VMExplorerFtpBackup.py will start
-* VMExplorerFtpBackup.py scans the local path where virtual machines backups are located and will create/update a backup database called dumpfile.dm.
-this file contains all the information of previous backup ftp uploads to allows backup' s rotation.
+* VMExplorerFtpBackup.py will contact all the ftp server that store your old backups to to obtain the current backup status.
+* VMExplorerFtpBackup.py then scans the local path where virtual machines backups are located.
 * VMExplorerFtpBackup.py learns which old backups needs to be deleted from ftp servers and which new backups needs to be uploaded.
-* VMExplorerFtpBackup.py deletes and uploads required files
-* VMExplorerFtpBackup.py updates the local backup database called dumpfile.dm
-* run a command to delete the local path that contains virtual machines backups (you can use the -x option)
+* VMExplorerFtpBackup.py deletes and uploads required backup files
+* VMExplorerFtpBackup.py can run a command to delete the local path that contains virtual machines backups (you can use the -x option)
 
 HOW TO SETUP VMExplorer
 ----
@@ -28,6 +27,16 @@ edit config.py and sets your ftp hosts connection properties as: hostname, port,
 HOW TO START THE PROGRAM
 ----
 run  VMExplorerFtpBackup.py -h to see all available options.
+
+HOW VMExplorerFtpBackup.py uploads the backups on remote ftp server?
+----
+VMExplorerFtpBackup.py relies on ftputil for connecting and inspecting the content of folders in ftp servers. The upload of the files can be perfomed using 3 different methods:
+* curl (the default)
+* ncftpput
+* ftputil
+the reason of this is because depending on how the ftp server is configured ftputil can fail due to ftp's keepalive sessions.
+In my case, i have tried several ways to upload my files and curl was the one that did the job in the best way. this is the reason why it is set as default for the program.
+Anyway you can always change the upload method by setting the param -u. Use [curl],[ncftpput],[internal] to select the method that is the best for you.
 
 Notes
 ----
