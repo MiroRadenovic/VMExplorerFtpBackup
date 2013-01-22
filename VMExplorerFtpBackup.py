@@ -129,10 +129,10 @@ def start_backup(vmFolderTreePath, numberOfBackupsToKeep):
                 raise ex
         else: logging.info("As the parameter -S (Simulate) has been provided,  ftp sync will be skipped")
 
-        _send_mail(False)
+        _send_mail_with_log(False)
 
     except Exception:
-        _send_mail(True)
+        _send_mail_with_log(True)
         raise
 
 
@@ -273,7 +273,7 @@ def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
 #---------------------------
 
 
-def _send_mail(hasError):
+def _send_mail_with_log(hasError):
     if _send_mail:
         logging.debug("a mail will be now sent")
         if hasError:
