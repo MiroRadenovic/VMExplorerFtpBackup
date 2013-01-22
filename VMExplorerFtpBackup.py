@@ -284,8 +284,12 @@ def _configure_logger(verbosity):
         'debug': logging.DEBUG,
         }
     root = logging.getLogger()
-    root.setLevel(logging.DEBUG)
+    root.setLevel(verbosityLevels[verbosity])
     root.addHandler(ColorizingStreamHandler.ColorizingStreamHandler())
+
+    fileLogger = logging.FileHandler('VMExplorer.log')
+    root.addHandler(fileLogger)
+
 
    # try:
    #     logging.basicConfig(level=verbosityLevels[verbosity], format='%(message)s')
