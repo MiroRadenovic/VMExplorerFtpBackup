@@ -276,6 +276,8 @@ def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
 def _send_mail_with_log(hasError):
     if _send_mail:
         logging.debug("a mail will be now sent to {0}".format(config.SmtpInfo['to']))
+        import pdb
+        pdb.set_trace()
         if hasError:
             mailManager.send_email_with_log(config.SmtpInfo, useSubjectWithError=True)
         else:
