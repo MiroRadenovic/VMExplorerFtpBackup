@@ -121,6 +121,7 @@ class FtpWrapper():
             curlReturnValue = p.returncode
             if(curlReturnValue != 0):
                 logging.error("CURL has encurred into an error! the program execution will stop!")
+                raise Exception('CURL returned invalid status code')
 
 
 
