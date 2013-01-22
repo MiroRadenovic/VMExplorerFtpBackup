@@ -5,6 +5,9 @@ __user = 'VMExplorerFtpBackup@dev4side.com'
 #http://www.mkyong.com/python/how-do-send-email-in-python-via-smtplib/
 
 def send_email_with_log(SmtpInfo, useSubjectWithError = False):
+    import pdb
+    pdb.set_trace()
+
     to = 'mkyong2002@yahoo.com'
     smtpserver = smtplib.SMTP(SmtpInfo['smtpserver'])
     smtpserver.ehlo()
