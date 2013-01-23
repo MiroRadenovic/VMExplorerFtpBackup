@@ -69,7 +69,7 @@ class FtpWrapper():
     def listdir(self,path):
         try:
             return self._ftplib.listdir(path)
-        except TemporaryError:
+        except ftputil.ftp_error.TemporaryError:
             return self._ftplib.listdir(path)
 
     def rmtree(self, path):
