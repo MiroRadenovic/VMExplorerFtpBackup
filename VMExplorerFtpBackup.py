@@ -158,9 +158,9 @@ def get_backups_from_ftp_servers():
             backupsInFtpHost = backupManager.getBackupsFromFtpServer(ftpWrapper)
             ftpWrapper.disconnect_from_host()
             backupManager.merge_first_backup_into_second_backup(backupsInFtpHost, result)
-        except Exception:
+        except Exception, ex :
             logging.error("an error occurred in trying to get read backups from host {0}. Please make sure the ftp "
-                          "connection to the host is correct! quitting..".format(ftpWrapper.hostname))
+                          "connection to the host is correct!. the error is: {1}.  Quitting..".format(ftpWrapper.hostname, str(ex)))
             sys.exit()
 
 
