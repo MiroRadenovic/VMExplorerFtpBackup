@@ -28,6 +28,7 @@ import logging
 import logging.handlers
 from subprocess import Popen
 import traceback
+import sys
 
 #programs imports
 import backupManager
@@ -110,7 +111,6 @@ def start_backup(vmFolderTreePath, numberOfBackupsToKeep):
         backupsToUpload= backupManager.getBackupsFromFolderTree(vmFolderTreePath)
         if len(backupsToUpload) == 0:
             logging.warn("No new backups are found in folder {0} . there is no need to continue! exiting....".format(vmFolderTreePath))
-            import sys
             sys.exit()
 
         logging.debug("* the provided local path [{0}] contains the following backups that will be uploaded to respective" \
@@ -160,7 +160,10 @@ def get_backups_from_ftp_servers():
             backupManager.merge_first_backup_into_second_backup(backupsInFtpHost, result)
         except Exception:
             logging.error("an error occurred in trying to get read backups from host {0}. Please make sure the ftp "
-                          "connection to the host is correct")
+                          "connection to the host is correct! quitting..".format(ftpWrapper.hostname))
+            sys.exit()
+
+
     return result
 
 
