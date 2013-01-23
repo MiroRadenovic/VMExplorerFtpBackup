@@ -67,7 +67,10 @@ class FtpWrapper():
             self._ftplib.makedirs(remoteFolder)
 
     def listdir(self,path):
-        return self._ftplib.listdir(path)
+        try:
+            return self._ftplib.listdir(path)
+        except TemporaryError:
+            return self._ftplib.listdir(path)
 
     def rmtree(self, path):
         self._ftplib.rmtree(path)
