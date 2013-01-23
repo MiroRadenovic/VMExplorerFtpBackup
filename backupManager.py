@@ -44,6 +44,7 @@ def getBackupsFromFolderTree(pathToFolder):
                       "specified the correct path where your vm backs are stored? are you using the correct folder name patter for dates?")
 
 def getBackupsFromFtpServer(ftpWrapper):
+    import pdb; pdb.set_trace()
     result = {}
     names = ftpWrapper.listdir(ftpWrapper.curdir())
     for serverName in names:
@@ -54,7 +55,6 @@ def getBackupsFromFtpServer(ftpWrapper):
             files = ftpWrapper.listdir(serverName + '/' + date)
             backupsInServer[currentDate] = files
         result[serverName] = backupsInServer
-    #ftpWrapper.disconnect_from_host()
     return result
 
 def upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree, uploadMethod='curl'):

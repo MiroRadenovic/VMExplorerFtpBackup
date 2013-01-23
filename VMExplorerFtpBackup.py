@@ -21,25 +21,29 @@
 miro
 '''
 
+#py core imports
 import optparse
+from datetime import datetime
 import logging
 import logging.handlers
 from subprocess import Popen
 import traceback
 
+#programs imports
 import backupManager
 import backupRender
 import backupSerializer
 import ftpHostFactory
 import mailManager
 
+#external
 import ColorizingStreamHandler
 
 
 
 
 config = None
-_softwareVersion = 0.1
+_softwareVersion = 0.2
 
 # program start
 
@@ -350,6 +354,7 @@ def _import_ftp_config(configToImport):
 def _draw_welcome_banner():
     logging.info("\n\n##################################################")
     logging.info("########## VMExplorerFtpBackUp v.{0} #############".format(_softwareVersion))
+    logging.info("#### started ad {0} #######".format(str(datetime.now())))
     logging.info("##################################################\n")
 
 
