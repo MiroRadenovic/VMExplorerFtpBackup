@@ -67,10 +67,12 @@ class FtpWrapper():
             self._ftplib.makedirs(remoteFolder)
 
     def listdir(self,path):
-        try:
-            return self._ftplib.listdir(path)
-        except ftputil.ftp_error.TemporaryError:
-            return self._ftplib.listdir(path)
+        import pdb; pdb.set_trace()
+        return self._ftplib.listdir(path)
+#        try:
+#            return self._ftplib.listdir(path)
+#        except ftputil.ftp_error.TemporaryError:
+#            return self._ftplib.listdir(path)
 
     def rmtree(self, path):
         self._ftplib.rmtree(path)
