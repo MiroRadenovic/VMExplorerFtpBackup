@@ -48,6 +48,8 @@ class FtpWrapper():
 
     def connect_to_host(self):
         self._ftplib =  ftputil.FTPHost(self.hostname, self.user, self.password, port=self.port, session_factory=FtpSession)
+        #try from lazarus...
+        self._ftplib._accepts_list_a_option = False
         if self.remoteFolder != None:
             self._ftplib.chdir(self.remoteFolder)
         else:
