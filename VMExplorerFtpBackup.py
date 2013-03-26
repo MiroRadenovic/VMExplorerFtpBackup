@@ -215,6 +215,29 @@ def get_only_new_backups(dictionaryOfBackups, numberOfBackupsToTake):
         result[key] = dictionaryOfBackups[key]
     return result
 
+
+def delete_failed_backups(candidateFailedUploads):
+    '''
+    Deletes backups that have not been uploaded correctly
+    '''
+
+    import pdb
+    pdb.set_trace()
+
+
+    logging.error('An error occurred during the upload of the following virtual machines backup:')
+    for vmName in candidateFailedUploads:
+        logging.error('- ' + vmName)
+    logging.error('the cleanup of invalid backups will now start')
+
+    if _use_real_ftp_sync:
+        for vmName in candidateFailedUploads:
+            ftphost = _get_ftpHost_by_vmName(vmName)
+            backupManager.delete_backups_from_ftpHost(candidateFailedUploads, ftphost)
+            logging.info('backup files for {0} have been deleted.')
+
+
+
 def sync_backups_with_ftp_servers(vmPathBackupFolderTree, backups):
     '''
     uploads backups to the ftp server defined in the config file
@@ -226,7 +249,9 @@ def sync_backups_with_ftp_servers(vmPathBackupFolderTree, backups):
     logging.info("* first let's delete all old backups from each ftp server")
     deleted_old_backups_from_ftp_servers(backups)
     logging.info("*All backup deletion has finished. Let's start now the backup upload")
-    upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree)
+    candidateFailedUploads =  upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree)
+    if (len(candidateFailedUploads) > 0):
+        delete_failed_backups(candidateFailedUploads)
     logging.info("syncing to ftp has finished successfully")
 
 def deleted_old_backups_from_ftp_servers(backups):
@@ -261,18 +286,29 @@ def deleted_old_backups_from_ftp_servers(backups):
             ftphost.disconnect_from_host()
 
 def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
+    failedUploads = {}
+
     for vmName in backups:
-        ftphost = _get_ftpHost_by_vmName(vmName)
-        logging.info("** backup's upload for VM {0} with ftp server {1} will now start!".format(vmName, ftphost.hostname))
-        ftphost.connect_to_host()
-        backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
-        ftphost.disconnect_from_host()
+        try:
+            ftphost = _get_ftpHost_by_vmName(vmName)
+            logging.info("** backup's upload for VM {0} with ftp server {1} will now start!".format(vmName, ftphost.hostname))
+            ftphost.connect_to_host()
+            backupsToDelete, backupsToUpload = backupManager.get_backups_for_upload_and_delete(backups, ftphost)
+            ftphost.disconnect_from_host()
+            # unico pezzo dove non e richiesta una connessione aperta
 
-        # unico pezzo dove non e richiesta una connessione aperta
+            if len(backupsToUpload) > 0:
+                if _use_real_ftp_sync:
+                    backupManager.upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree, uploadMethod=_upload_method)
 
-        if len(backupsToUpload) > 0:
-            if _use_real_ftp_sync:
-                backupManager.upload_backups_to_ftpHost(backupsToUpload, ftphost, vmName, vmPathBackupFolderTree, uploadMethod=_upload_method)
+        except Exception as ex:
+            logging.error('An error occurred during the upload of ' + vmName)
+            logging.error(ex)
+            failedUploads[vmName] = backups
+
+    return failedUploads
+
+
 
 #---------------------------
 #     private methods
