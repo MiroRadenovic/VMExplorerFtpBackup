@@ -70,7 +70,7 @@ class FtpWrapper():
 
     def listdir(self,path):
         import pdb; pdb.set_trace()
-        return self._ftplib.listdir(path)
+#        return self._ftplib.listdir(path)
 #        try:
 #            return self._ftplib.listdir(path)
 #        except ftputil.ftp_error.TemporaryError:
