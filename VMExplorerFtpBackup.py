@@ -117,7 +117,46 @@ def start_backup(vmFolderTreePath, numberOfBackupsToKeep):
                       " ftp servers: \n {1}".format(vmFolderTreePath, backupRender.get_backups_infos(backupsToUpload)))
         backupsOnFtpServers = get_backups_from_ftp_servers()
         logging.info("* backups stored into ftp servers are: \n: {0}".format(backupRender.get_backups_infos(backupsOnFtpServers)))
+
+
+
+
+        logging.debug('---- backup to upload-------')
+        logging.debug('FIX- upload_new_backups_to_ftp_server')
+        logging.debug(backupsToUpload)
+        logging.debug('-----------')
+        for vmName in backupsToUpload:
+            logging.debug(backupsToUpload[vmName])
+        logging.debug('end fix -----------')
+
+
+
+        logging.debug('------ backup on server -----')
+        logging.debug('FIX- upload_new_backups_to_ftp_server')
+        logging.debug(backupsOnFtpServers)
+        logging.debug('-----------')
+        for vmName in backupsOnFtpServers:
+            logging.debug(backupsOnFtpServers[vmName])
+        logging.debug('end fix -----------')
+
+
+
+
+
         backups = backupManager.get_merge_of_backups(backupsToUpload, backupsOnFtpServers)
+
+
+
+        logging.debug('------ backup  merge-----')
+        logging.debug('FIX- upload_new_backups_to_ftp_server')
+        logging.debug(backups)
+        logging.debug('-----------')
+        for vmName in backups:
+            logging.debug(backups[vmName])
+        logging.debug('end fix -----------')
+
+
+
         logging.info("* the merge of backups found in backup folder and those present int the dump file has finished"
                       " successfully. The next step is to remove old backus.")
         sort_and_remove_old_backups(backups, numberOfBackupsToKeep)
@@ -225,10 +264,10 @@ def delete_failed_backups(candidateFailedUploads):
     pdb.set_trace()
 
 
-    logging.error('An error occurred during the upload of the following virtual machines backup:')
+    logging.warn('this are the backus that failed :')
     for vmName in candidateFailedUploads:
-        logging.error('- ' + vmName)
-    logging.error('the cleanup of invalid backups will now start')
+        logging.warn('- ' + vmName)
+    logging.warn('the cleanup of invalid backups will now start')
 
     if _use_real_ftp_sync:
         for vmName in candidateFailedUploads:
@@ -251,6 +290,8 @@ def sync_backups_with_ftp_servers(vmPathBackupFolderTree, backups):
     logging.info("*All backup deletion has finished. Let's start now the backup upload")
     candidateFailedUploads =  upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree)
     if (len(candidateFailedUploads) > 0):
+        logging.warn("Some backups failed during the upload to ftp... this sucks... let's delete the uploads that have"
+                     " not finished correctly")
         delete_failed_backups(candidateFailedUploads)
     logging.info("syncing to ftp has finished successfully")
 
@@ -287,6 +328,15 @@ def deleted_old_backups_from_ftp_servers(backups):
 
 def upload_new_backups_to_ftp_servers(backups, vmPathBackupFolderTree):
     failedUploads = {}
+
+    logging.debug('-----------')
+    logging.debug('FIX- upload_new_backups_to_ftp_server')
+    logging.debug(backups)
+    logging.debug('-----------')
+    for vmName in backups:
+        logging.debug(backups[vmName])
+    logging.debug('end fix -----------')
+
 
     for vmName in backups:
         try:
